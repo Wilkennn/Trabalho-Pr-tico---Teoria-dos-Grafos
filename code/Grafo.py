@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 class Grafo:
 
     def __init__(self, isDirecionado=False):
-        self.__lista_de_vertices: List[str] = []  # Lista de vértices
+        self.__lista_de_vertices = []  # Lista de vértices
         self.__lista_de_arestas: List[Tuple[str, str]] = []  # Lista de arestas
         self.__lista_de_adjacentes: Dict[str, List[str]] = {}  # Dicionário de adjacências
         self.__direcionado: bool = isDirecionado  # Tipo de grafo (direcionado ou não)
@@ -31,13 +31,13 @@ class Grafo:
                     return aresta
         return None
 
-    def addVertice(self, vertice: str) -> bool:
+    def addVertice(self, vertice: str, ponderacao: int) -> bool:
         if vertice in self.__lista_de_vertices:
             print("Vértice já existe no grafo.")
             return False
-        
-        self.__lista_de_vertices.append(vertice)
+        self.__lista_de_vertices.append((vertice, ponderacao ))
         self.__lista_de_adjacentes[vertice] = []
+
         print(f"Vértice {vertice} adicionado com sucesso.")
         return True
     
@@ -53,7 +53,7 @@ class Grafo:
             print(f"Vértice {vertice} removido com sucesso.")
             return True
     
-    def addAresta(self, verticeA: str, verticeB: str) -> bool:
+    def addAresta(self, verticeA: str, verticeB: str):
         if verticeA in self.__lista_de_vertices and verticeB in self.__lista_de_vertices:
             if self.__direcionado:
                 self.__lista_de_arestas.append((verticeA, verticeB))
@@ -109,3 +109,6 @@ class Grafo:
             return verticeB1 == verticeA2 or verticeA1 == verticeB2
         else:
             return verticeA1 == verticeA2 or verticeA1 == verticeB2 or verticeB1 == verticeA2 or verticeB1 == verticeB2
+        
+    def get_vertices(self) -> List[str]:
+        return self.__lista_de_vertices    

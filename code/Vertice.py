@@ -1,5 +1,5 @@
 class Vertice:
-    def __init__(self, rotulacao=None, ponderacao=None):
+    def __init__(self, rotulacao, ponderacao=None):
         self.__rotulacao  = rotulacao
         self.__ponderacao = ponderacao
     
