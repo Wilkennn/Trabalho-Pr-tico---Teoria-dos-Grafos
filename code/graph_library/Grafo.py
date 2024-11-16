@@ -1,6 +1,6 @@
 from typing import List, Dict
-from Aresta import Aresta
-from Vertice import Vertice
+from graph_library.Aresta import Aresta
+from graph_library.Vertice import Vertice
 
 class Grafo:
 
@@ -246,3 +246,157 @@ class Grafo:
         
         print("O grafo é completo.")
         return True
+    
+    def gerar_matriz_incidencia(self) -> List[List[int]]:
+        num_vertices = self.getNumVertices()
+        num_arestas = self.getNumArestas()
+        
+        # Inicializa uma matriz de zeros com tamanho adequado
+        matriz_incidencia = [[0 for _ in range(num_arestas)] for _ in range(num_vertices)]
+        
+        # Dicionário para mapear nomes dos vértices para índices da matriz
+        vertice_to_index = {vertice.getNome(): index for index, vertice in enumerate(self.__lista_de_vertices)}
+
+        for index_aresta, aresta in enumerate(self.__lista_de_arestas):
+            verticeA = aresta.getVerticeA().getNome()
+            verticeB = aresta.getVerticeB().getNome()
+            direcionada = aresta.isDirecionada()
+
+            matriz_incidencia[vertice_to_index[verticeA]][index_aresta] = -1 if direcionada else 1
+            matriz_incidencia[vertice_to_index[verticeB]][index_aresta] = 1
+
+        return matriz_incidencia
+
+    def exibir_matriz_incidencia(self) -> None:
+        matriz = self.gerar_matriz_incidencia()
+        vertices = [vertice.getNome() for vertice in self.__lista_de_vertices]
+        arestas = [(aresta.getVerticeA().getNome(), aresta.getVerticeB().getNome()) for aresta in self.__lista_de_arestas]
+        
+        # Título
+        print("Matriz de Incidência (linhas = vértices, colunas = arestas):")
+        
+        # Cabeçalhos de arestas
+        header = "       " + "  ".join(f"({a}, {b})" for a, b in arestas)
+        print(header)
+        
+        # Corpo da matriz
+        for vertice, linha in zip(vertices, matriz):
+            valores = "  ".join(f"    {valor:2}" for valor in linha)
+            print(f"{vertice}:  {valores}")
+
+    def gerar_matriz_adjacencia(self) -> List[List[int]]:
+        num_vertices = self.getNumVertices()
+        num_arestas = self.getNumArestas()
+        
+        matriz_adjacencia = [[0] * num_vertices for _ in range(num_vertices)]
+        
+        vertice_to_index = {vertice.getNome(): index for index, vertice in enumerate(self.__lista_de_vertices)}
+
+        for aresta in self.__lista_de_arestas:
+            verticeA = aresta.getVerticeA().getNome()
+            verticeB = aresta.getVerticeB().getNome()
+            direcionada = aresta.isDirecionada()
+
+            i = vertice_to_index[verticeA]
+            j = vertice_to_index[verticeB]
+            
+            if direcionada:
+                matriz_adjacencia[i][j] = 1
+            else:
+                matriz_adjacencia[i][j] = 1
+                matriz_adjacencia[j][i] = 1
+
+        return matriz_adjacencia
+
+    def exibir_matriz_adjacencia(self) -> None:
+        """
+        Exibe a matriz de adjacência de forma legível, com linhas e colunas representando os vértices.
+        """
+        # Gera a matriz de adjacência
+        matriz = self.gerar_matriz_adjacencia()
+        
+        # Obtém os nomes dos vértices
+        vertices = [vertice.getNome() for vertice in self.__lista_de_vertices]
+        
+        # Título
+        print("Matriz de Adjacência (linhas = vértices, colunas = vértices):")
+        
+        # Cabeçalhos de vértices
+        header = "       " + "  ".join(f"{v:2}" for v in vertices)
+        print(header)
+        
+        # Corpo da matriz
+        for vertice, linha in zip(vertices, matriz):
+            valores = "  ".join(f"{valor:2}" for valor in linha)
+            print(f"{vertice:2}: {valores}")
+
+
+    def gerar_lista_adjacencia(self) -> dict:
+
+        # Inicializa o dicionário para a lista de adjacência
+        lista_adjacencia = {vertice.getNome(): [] for vertice in self.__lista_de_vertices}
+
+        # Preenche a lista de adjacência com base nas arestas
+        for aresta in self.__lista_de_arestas:
+            verticeA = aresta.getVerticeA().getNome()
+            verticeB = aresta.getVerticeB().getNome()
+
+            # Adiciona a conexão no dicionário
+            lista_adjacencia[verticeA].append(verticeB)
+
+            # Se a aresta não for direcionada, adiciona o inverso
+            if not aresta.isDirecionada():
+                lista_adjacencia[verticeB].append(verticeA)
+
+        return lista_adjacencia
+    
+    def exibir_lista_adjacencia(self) -> None:
+        lista_adjacencia = self.gerar_lista_adjacencia()
+
+        # Exibe os dados
+        print("Lista de Adjacência:")
+        for vertice, adjacentes in lista_adjacencia.items():
+            adjacentes_formatados = ", ".join(adjacentes)
+            print(f"{vertice}: {adjacentes_formatados}")
+
+    def busca_em_profundidade(self, start):
+        # Verifica se o vértice de início está no grafo
+        if start.getNome() not in self.__lista_de_adjacentes:
+            print(f"O vértice '{start.getNome()}' não existe no grafo.")
+            return []
+
+        # Inicializa os tempos e pais dos vértices
+        for v in self.__lista_de_vertices:
+            v.set_tempo_termino(0)
+            v.set_tempo_descoberta(0)
+            v.set_vertice_pai(None)
+
+        t = 0  # Tempo global
+        # Função recursiva de busca em profundidade
+        def busca_profundidade_recursiva(v):
+            nonlocal t
+            v.set_tempo_descoberta(t)
+            t += 1
+
+            # percorre os vizinhos do vertice
+            for adj in self.__lista_de_adjacentes[v.getNome()]:
+                if adj.get_tempo_descoberta() == 0:  # se o vértice adjacente ainda não foi visitado
+                    adj.set_vertice_pai(v)
+                    busca_profundidade_recursiva(adj)
+
+            v.set_tempo_termino(t)
+            t += 1
+
+        start.set_tempo_descoberta(t)
+        t += 1
+        busca_profundidade_recursiva(start)
+        return [v.getNome() for v in self.__lista_de_vertices if v.get_tempo_termino() > 0]
+
+    def exibir_resultado_busca(self):
+        print(f"{'Vértice':<10} {'Pai':<10} {'Tempo Descoberta':<20} {'Tempo Término':<20}")
+        print("="*60)
+
+        for v in self.__lista_de_vertices:
+            pai_nome = v.get_vertice_pai().getNome() if v.get_vertice_pai() else "Nenhum"
+            
+            print(f"{v.getNome():<10} {pai_nome:<10} {v.get_tempo_descoberta():<20} {v.get_tempo_termino():<20}")

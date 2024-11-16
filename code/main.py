@@ -1,6 +1,6 @@
-from Grafo import Grafo
-from Aresta import Aresta
-from Vertice import Vertice
+from graph_library.Grafo import Grafo
+from graph_library.Aresta import Aresta
+from graph_library.Vertice import Vertice
 
 
 def opcao_sair():
@@ -86,44 +86,63 @@ def imprimir(grafo):
         print("O grafo não possui vértices.")
 
     for aresta in arestas:
-        print(aresta)     
+        print(aresta)
 
     print(f"{adjascentes}")
     print(f"{predecessores}")
     print(f"{sucessores}")
 
-    return True    
+    return True
 
 def adicionar_aresta(grafo):
     if grafo.getNumVertices() < 2:
         print("É necessário ter pelo menos dois vértices para adicionar uma aresta.")
-        return False
-    
-    verticeA = input("Digite o nome do primeiro vértice: ").strip()
-    verticeB = input("Digite o nome do segundo vértice: ").strip()
+        return True
 
-    if not any(verticeA == v.getNome() for v in grafo.getVertices()) or not any(verticeB == v.getNome() for v in grafo.getVertices()):
-        print("Um ou ambos os vértices não existem no grafo.")
-        return False  # Voltar para evitar adicionar a aresta
+    while True:
+        try:
+            qtd_arestas = int(input("Quantas arestas você deseja no seu grafo? "))
+            if qtd_arestas <= 0:
+                print("A quantidade de arestas deve ser um número positivo.")
+                continue
+            break
+        except ValueError:
+            print("Por favor, insira um número válido.")
 
-    tipo_aresta = input("A aresta será direcionada? (S/N): ").strip().lower()
+    count = 0
 
-    if tipo_aresta == 's':
-        direcionada = True
-    else:
-        direcionada = False
+    while count < qtd_arestas:
+        print(f"Preencha as informações da {count + 1}° aresta:")
+        
+        while True:
+            verticeA = input("Digite o nome do primeiro vértice: ").strip()
+            verticeB = input("Digite o nome do segundo vértice: ").strip()
 
-    ponderacao = input("Digite a ponderação da aresta (opcional, digite 0 para nenhuma): ").strip()
+            if any(verticeA == v.getNome() for v in grafo.getVertices()) and \
+               any(verticeB == v.getNome() for v in grafo.getVertices()):
+                break  # Saia do loop se os vértices forem válidos
 
-    try:
-        ponderacao = int(ponderacao)
-    except ValueError:
-        print("Valor inválido para ponderação. Considerando ponderação 0.")
-        ponderacao = 0
+            print("Um ou ambos os vértices não existem no grafo. Tente novamente.")
 
-    rotulacao = input("Digite o rótulo da aresta (opcional): ").strip()
+        tipo_aresta = input("A aresta será direcionada? (S/N): ").strip().lower()
 
-    grafo.addAresta(verticeA, verticeB, ponderacao, rotulacao, direcionada)
+        direcionada = tipo_aresta == 's'
+
+        ponderacao = input("Digite a ponderação da aresta (opcional, digite 0 para nenhuma): ").strip()
+
+        try:
+            ponderacao = int(ponderacao)
+        except ValueError:
+            print("Valor inválido para ponderação. Considerando ponderação 0.")
+            ponderacao = 0
+
+        rotulacao = input("Digite o rótulo da aresta (opcional): ").strip()
+
+        if grafo.addAresta(verticeA, verticeB, ponderacao, rotulacao, direcionada):
+            count += 1
+        else:
+            print("Falha ao adicionar a aresta. Tente novamente.")
+
     return True
 
 def remover_arestas(grafo):
@@ -190,7 +209,7 @@ def checarAdjA(grafo):
 def searchAresta(grafo):
 
     vA = input("Digite o nome do primeiro vértice da aresta: ").strip()
-    vB = input("Digite o nome do segundo vértice da aresta: ").strip()    
+    vB = input("Digite o nome do segundo vértice da aresta: ").strip()
 
     grafo.searchAresta(vA, vB)
 
@@ -223,6 +242,62 @@ def isempty(grafo):
     
     return True
 
+def matriz_incidencia(grafo):
+    
+    vazio = grafo.isEmpty();
+
+    if vazio:
+        print("O grafo está vazio, adicione antes de exibir a matriz de incidencia!")
+        return True
+    
+    grafo.exibir_matriz_incidencia()
+    return True
+    
+def matriz_adjacencia(grafo):
+    vazio = grafo.isEmpty();
+
+    if vazio:
+        print("O grafo está vazio, adicione antes de exibir a matriz de adjacência!")
+        return True
+    
+    grafo.exibir_matriz_adjacencia()
+    return True
+
+def lista_adjacencia(grafo):
+
+    vazio = grafo.isEmpty();
+
+    if vazio:
+        print("O grafo está vazio, adicione antes de exibir a Lista de adjacência!")
+        return True
+    
+    grafo.exibir_lista_adjacencia()
+    return True
+
+def busca_profundidade(grafo):
+    # Verifica se o grafo está vazio
+    if grafo.isEmpty():
+        print("O grafo está vazio, adicione antes de exibir a busca em profundidade!")
+        return True
+    
+    # Solicita o nome do vértice raiz
+    vertice_raiz_nome = input("Digite o nome do primeiro vértice: ").strip()
+
+    # Procura o vértice correspondente ao nome fornecido
+    vertice_raiz = None
+    for v in grafo.getVertices():
+        if v.getNome() == vertice_raiz_nome:
+            vertice_raiz = v
+            break
+
+    if vertice_raiz is None:
+        print("O vértice não existe no grafo.")
+        return True
+
+    grafo.busca_em_profundidade(vertice_raiz)
+    grafo.exibir_resultado_busca()
+    return True
+
 def main():
     grafo = Grafo()
 
@@ -238,7 +313,11 @@ def main():
         '8': lambda: numVerAr(grafo),
         '9': lambda: isempty(grafo),
         '10': lambda: iscompleto(grafo),
-        '11': lambda: imprimir(grafo)    
+        '11' : lambda: imprimir(grafo),
+        '12' :lambda: matriz_incidencia(grafo),
+        '13' :lambda: matriz_adjacencia(grafo),
+        '14' :lambda: lista_adjacencia(grafo),
+        '15' :lambda: busca_profundidade(grafo)
     }
 
     while True:
@@ -257,11 +336,15 @@ def main():
         print("9 - Verificar se o grafo está vazio")
         print("10 - Verificar se o grafo está completo")
         print("11 - Imprimir lista de vértices")
+        print("12 - Gerar Matriz Incidência")
+        print("13 - Gerar Matriz Adjacência")
+        print("14 - Gerar Lista Adjacência")
+        print("15 - Executar Busca em Profundidade")
         opcao = input(("\033[1;31m>\033[0m " ))
         print("")
         
         if opcao in opcoes:
-            if not opcoes[opcao]():  
+            if not opcoes[opcao]():
                 break
         else:
             print("Opção inválida. Por favor, tente outra opção.")

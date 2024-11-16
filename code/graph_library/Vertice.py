@@ -7,7 +7,28 @@ class Vertice:
 
         self.__rotulacao = rotulacao
         self.__ponderacao = ponderacao
+        self.__tempo_termino = None;
+        self.__tempo_descoberta = None;
+        self.__vertice_pai = None;
+    
+    def set_tempo_termino(self, tempo_termino: int) -> None:
+        self.__tempo_termino = tempo_termino
 
+    def get_tempo_termino(self) -> int:
+        return self.__tempo_termino
+    
+    def set_tempo_descoberta(self, tempo_descoberta: int) -> None:
+        self.__tempo_descoberta = tempo_descoberta
+    
+    def get_tempo_descoberta(self) -> int:
+        return self.__tempo_descoberta
+    
+    def set_vertice_pai(self, vertice_pai: 'Vertice') -> None:
+        self.__vertice_pai = vertice_pai
+
+    def get_vertice_pai(self) -> 'Vertice':
+        return self.__vertice_pai
+    
     def getNome(self):
         return self.__rotulacao
 

@@ -1,4 +1,4 @@
-from Vertice import Vertice
+from graph_library.Vertice import Vertice
 
 class Aresta:
     def __init__(self, verticeA, verticeB, ponderacao, rotulacao, direcionada=False):
