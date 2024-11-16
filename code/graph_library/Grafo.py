@@ -12,6 +12,55 @@ class Grafo:
         self.__sucessores: Dict[str, List[str]] = {}
         self.__direcionado: bool = isDirecionado
 
+    def copy(self):
+        copia = Grafo()
+        
+        # Copia os vértices
+        for vertice in self.getVertices():
+            copia.addVertice(vertice.getNome(), vertice.getPonderacao())
+        
+        # Copia as arestas
+        for aresta in self.getArestas():
+            copia.addAresta(
+                aresta.getVerticeA().getNome(),
+                aresta.getVerticeB().getNome(),
+                aresta.getPonderacao(),
+                aresta.getRotulacao(),
+                aresta.isDirecionada()
+            )
+        
+        return copia
+    
+    def reverse(self):
+        reverso = Grafo()
+        
+        # Copia os vértices
+        for vertice in self.getVertices():
+            reverso.addVertice(vertice.getNome(), vertice.getPonderacao())
+        
+        # Inverte as arestas direcionadas
+        for aresta in self.getArestas():
+            if aresta.isDirecionada():
+                # Inverte apenas arestas direcionadas
+                reverso.addAresta(
+                    aresta.getVerticeB().getNome(),  # Troca B com A
+                    aresta.getVerticeA().getNome(),  # Troca A com B
+                    aresta.getPonderacao(),
+                    aresta.getRotulacao(),
+                    aresta.isDirecionada()
+                )
+            else:
+                # Copia arestas não direcionadas sem alterações
+                reverso.addAresta(
+                    aresta.getVerticeA().getNome(),
+                    aresta.getVerticeB().getNome(),
+                    aresta.getPonderacao(),
+                    aresta.getRotulacao(),
+                    aresta.isDirecionada()
+                )
+        
+        return reverso
+        
     def getVertices(self) -> List[str]:
         return self.__lista_de_vertices
     
@@ -414,3 +463,24 @@ class Grafo:
                     print(f"{v.get_tempo_termino():<10}", end=" ")
 
             print()
+
+    def kosaraju(grafo):
+        if grafo.isEmpty():
+            print("O grafo está vazio. Adicione vértices e arestas antes de executar o algoritmo.")
+            return []
+
+        stack = grafo.busca_em_profundidade()
+
+        grafo_reverso = grafo.reverse()
+
+        componentes = []
+        visitados = set()
+
+        for vertice in reversed(stack):
+            if vertice not in visitados:
+                componente_atual = []
+                grafo_reverso.busca_em_profundidade(vertice, visitados, componente_atual)
+                componentes.append(componente_atual)
+
+        return componentes
+
