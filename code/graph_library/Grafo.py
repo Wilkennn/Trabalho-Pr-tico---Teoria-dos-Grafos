@@ -5,12 +5,12 @@ from graph_library.Vertice import Vertice
 class Grafo:
 
     def __init__(self, isDirecionado=False):
-        self.__lista_de_vertices = []  # Lista de vértices
-        self.__lista_de_arestas = []  # Lista de arestas
-        self.__lista_de_adjacentes: Dict[str, List[str]] = {}  # Dicionário de adjacências
-        self.__predecessores: Dict[str, List[str]] = {}  # Dicionário de predecessores
-        self.__sucessores: Dict[str, List[str]] = {}  # Dicionário de sucessores
-        self.__direcionado: bool = isDirecionado  # Tipo de grafo (direcionado ou não)
+        self.__lista_de_vertices = []
+        self.__lista_de_arestas = []
+        self.__lista_de_adjacentes: Dict[str, List[str]] = {}
+        self.__predecessores: Dict[str, List[str]] = {}
+        self.__sucessores: Dict[str, List[str]] = {}
+        self.__direcionado: bool = isDirecionado
 
     def getVertices(self) -> List[str]:
         return self.__lista_de_vertices
@@ -58,12 +58,10 @@ class Grafo:
                     print(f"Os vértices '{verticeA}' e '{verticeB}' são adjacentes.")
                     return True
     
-        # Se não encontrou arestas conectando os vértices
         print(f"'{verticeA}' e '{verticeB}' NÃO são adjacentes.")
         return False
 
     def areAdjA(self, aresta1: Aresta, aresta2: Aresta) -> bool:
-        # Obtendo os vértices das arestas
         verticeA1 = aresta1.getVerticeA().getNome()
         verticeB1 = aresta1.getVerticeB().getNome()
         verticeA2 = aresta2.getVerticeA().getNome()
@@ -122,7 +120,6 @@ class Grafo:
             )
         ]
 
-        # Atualiza as listas de adjacências, predecessores e sucessores
         if verticeA in self.__lista_de_adjacentes and verticeB in self.__lista_de_adjacentes[verticeA]:
             self.__lista_de_adjacentes[verticeA].remove(verticeB)
         if verticeB in self.__lista_de_adjacentes and verticeA in self.__lista_de_adjacentes[verticeB]:
@@ -184,7 +181,7 @@ class Grafo:
     def removeVertice(self, rotulacao: str) -> bool:
         vertice_encontrado = None
         for vertice in self.__lista_de_vertices:
-            if str(vertice) == rotulacao:  
+            if str(vertice) == rotulacao:
                 vertice_encontrado = vertice
                 break
 
@@ -278,14 +275,11 @@ class Grafo:
         vertices = [vertice.getNome() for vertice in self.__lista_de_vertices]
         arestas = [(aresta.getVerticeA().getNome(), aresta.getVerticeB().getNome()) for aresta in self.__lista_de_arestas]
         
-        # Título
         print("Matriz de Incidência (linhas = vértices, colunas = arestas):")
         
-        # Cabeçalhos de arestas
         header = "       " + "  ".join(f"({a}, {b})" for a, b in arestas)
         print(header)
         
-        # Corpo da matriz
         for vertice, linha in zip(vertices, matriz):
             valores = "  ".join(f"    {valor:2}" for valor in linha)
             print(f"{vertice}:  {valores}")
@@ -315,23 +309,15 @@ class Grafo:
         return matriz_adjacencia
 
     def exibir_matriz_adjacencia(self) -> None:
-        """
-        Exibe a matriz de adjacência de forma legível, com linhas e colunas representando os vértices.
-        """
-        # Gera a matriz de adjacência
         matriz = self.gerar_matriz_adjacencia()
         
-        # Obtém os nomes dos vértices
         vertices = [vertice.getNome() for vertice in self.__lista_de_vertices]
         
-        # Título
         print("Matriz de Adjacência (linhas = vértices, colunas = vértices):")
         
-        # Cabeçalhos de vértices
         header = "       " + "  ".join(f"{v:2}" for v in vertices)
         print(header)
         
-        # Corpo da matriz
         for vertice, linha in zip(vertices, matriz):
             valores = "  ".join(f"{valor:2}" for valor in linha)
             print(f"{vertice:2}: {valores}")
@@ -359,7 +345,6 @@ class Grafo:
     def exibir_lista_adjacencia(self) -> None:
         lista_adjacencia = self.gerar_lista_adjacencia()
 
-        # Exibe os dados
         print("Lista de Adjacência:")
         for vertice, adjacentes in lista_adjacencia.items():
             adjacentes_formatados = ", ".join(adjacentes)
@@ -369,6 +354,8 @@ class Grafo:
         if start.getNome() not in self.__lista_de_adjacentes:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
+        
+        print(self.exibir_lista_adjacencia())
 
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
@@ -381,7 +368,6 @@ class Grafo:
             v.set_tempo_descoberta(t)
             t += 1
 
-            print(self.__lista_de_adjacentes)
             for adjNome in self.__lista_de_adjacentes[v.getNome()]:
 
                 adj = None
@@ -408,23 +394,18 @@ class Grafo:
         return [v.getNome() for v in self.__lista_de_vertices if v.get_tempo_termino() > 0]
 
     def exibir_resultado_busca(self):
-        # Exibindo os cabeçalhos das colunas com os nomes dos vértices
-        vertices = self.getVertices()  # Obtém todos os vértices
+        vertices = self.getVertices()
         cabecalho = f"{'Atributo':<20}" + ''.join([f"{v.getNome():<10}" for v in vertices])
         print(cabecalho)
         print("=" * len(cabecalho))
 
-        # Exibindo os valores dos atributos por vértice
         atributos = ['Tempo Descoberta', 'Tempo Término', 'Pai']
 
         for atributo in atributos:
-            # Exibindo o nome do atributo
             print(f"{atributo:<20}", end=" ")
 
-            # Exibindo os valores dos vértices para o atributo atual
             for v in vertices:
                 if atributo == 'Pai':
-                    # Obter o nome do pai (se houver)
                     pai_nome = v.get_vertice_pai().getNome() if v.get_vertice_pai() else "Nenhum"
                     print(f"{pai_nome:<10}", end=" ")
                 elif atributo == 'Tempo Descoberta':
@@ -432,5 +413,4 @@ class Grafo:
                 elif atributo == 'Tempo Término':
                     print(f"{v.get_tempo_termino():<10}", end=" ")
 
-            # Pula para a próxima linha após exibir todos os vértices para o atributo atual
             print()
