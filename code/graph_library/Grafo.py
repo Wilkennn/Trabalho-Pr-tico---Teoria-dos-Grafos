@@ -15,6 +15,12 @@ class Grafo:
     def getVertices(self) -> List[str]:
         return self.__lista_de_vertices
     
+    def getVertice(self, rotulacao: str):
+        for vertice in self.__lista_de_vertices:
+            if vertice.getNome() == rotulacao:
+                return vertice
+        return None
+    
     def getAdj(self) -> Dict[str, List[str]]:
         return self.__lista_de_adjacentes
     
@@ -360,27 +366,31 @@ class Grafo:
             print(f"{vertice}: {adjacentes_formatados}")
 
     def busca_em_profundidade(self, start):
-        # Verifica se o vértice de início está no grafo
         if start.getNome() not in self.__lista_de_adjacentes:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
 
-        # Inicializa os tempos e pais dos vértices
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
             v.set_tempo_descoberta(0)
             v.set_vertice_pai(None)
 
-        t = 0  # Tempo global
-        # Função recursiva de busca em profundidade
+        t = 0
         def busca_profundidade_recursiva(v):
             nonlocal t
             v.set_tempo_descoberta(t)
             t += 1
 
-            # percorre os vizinhos do vertice
-            for adj in self.__lista_de_adjacentes[v.getNome()]:
-                if adj.get_tempo_descoberta() == 0:  # se o vértice adjacente ainda não foi visitado
+            print(self.__lista_de_adjacentes)
+            for adjNome in self.__lista_de_adjacentes[v.getNome()]:
+
+                adj = None
+                for vAdj in self.getVertices():
+                    if vAdj.getNome() == adjNome:
+                        adj = vAdj
+                        break
+
+                if adj.get_tempo_descoberta() == 0:
                     adj.set_vertice_pai(v)
                     busca_profundidade_recursiva(adj)
 
@@ -390,13 +400,37 @@ class Grafo:
         start.set_tempo_descoberta(t)
         t += 1
         busca_profundidade_recursiva(start)
+
+        for v in self.__lista_de_vertices:
+            if v.get_tempo_descoberta() == 0:
+                busca_profundidade_recursiva(v)
+
         return [v.getNome() for v in self.__lista_de_vertices if v.get_tempo_termino() > 0]
 
     def exibir_resultado_busca(self):
-        print(f"{'Vértice':<10} {'Pai':<10} {'Tempo Descoberta':<20} {'Tempo Término':<20}")
-        print("="*60)
+        # Exibindo os cabeçalhos das colunas com os nomes dos vértices
+        vertices = self.getVertices()  # Obtém todos os vértices
+        cabecalho = f"{'Atributo':<20}" + ''.join([f"{v.getNome():<10}" for v in vertices])
+        print(cabecalho)
+        print("=" * len(cabecalho))
 
-        for v in self.__lista_de_vertices:
-            pai_nome = v.get_vertice_pai().getNome() if v.get_vertice_pai() else "Nenhum"
-            
-            print(f"{v.getNome():<10} {pai_nome:<10} {v.get_tempo_descoberta():<20} {v.get_tempo_termino():<20}")
+        # Exibindo os valores dos atributos por vértice
+        atributos = ['Tempo Descoberta', 'Tempo Término', 'Pai']
+
+        for atributo in atributos:
+            # Exibindo o nome do atributo
+            print(f"{atributo:<20}", end=" ")
+
+            # Exibindo os valores dos vértices para o atributo atual
+            for v in vertices:
+                if atributo == 'Pai':
+                    # Obter o nome do pai (se houver)
+                    pai_nome = v.get_vertice_pai().getNome() if v.get_vertice_pai() else "Nenhum"
+                    print(f"{pai_nome:<10}", end=" ")
+                elif atributo == 'Tempo Descoberta':
+                    print(f"{v.get_tempo_descoberta():<10}", end=" ")
+                elif atributo == 'Tempo Término':
+                    print(f"{v.get_tempo_termino():<10}", end=" ")
+
+            # Pula para a próxima linha após exibir todos os vértices para o atributo atual
+            print()
