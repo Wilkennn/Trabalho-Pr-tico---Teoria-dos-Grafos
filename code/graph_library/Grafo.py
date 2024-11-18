@@ -34,12 +34,10 @@ class Grafo:
     def reverse(self):
         reverso = Grafo()
         
-        # Copia os vértices
         for vertice in self.getVertices():
             reverso.addVertice(vertice.getNome(), vertice.getPonderacao())
         
-        # Inverte as arestas direcionadas
-        for aresta in self.getArestas():
+        for aresta in self.getAllArestas():
             if aresta.isDirecionada():
                 # Inverte apenas arestas direcionadas
                 reverso.addAresta(
@@ -399,13 +397,18 @@ class Grafo:
             adjacentes_formatados = ", ".join(adjacentes)
             print(f"{vertice}: {adjacentes_formatados}")
 
-    def busca_em_profundidade(self, start):
+    def busca_em_profundidade(self, start=None):
+
+        if start is None:
+            if not self.__lista_de_vertices:
+                print("O grafo não possui vértices.")
+                return []
+            start = self.__lista_de_vertices[0]
+
         if start.getNome() not in self.__lista_de_adjacentes:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
-        
-        print(self.exibir_lista_adjacencia())
-
+                
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
             v.set_tempo_descoberta(0)
@@ -464,23 +467,64 @@ class Grafo:
 
             print()
 
-    def kosaraju(grafo):
-        if grafo.isEmpty():
+    def kosaraju(self):
+        if self.isEmpty():
             print("O grafo está vazio. Adicione vértices e arestas antes de executar o algoritmo.")
             return []
 
-        stack = grafo.busca_em_profundidade()
+        self.busca_em_profundidade()
 
-        grafo_reverso = grafo.reverse()
+        grafo_reverso = self.reverse()
 
-        componentes = []
+        self.__lista_de_vertices = sorted(self.__lista_de_vertices, key=lambda v: v.get_tempo_termino() if v.get_tempo_termino() is not None else float('inf'))
+
+        grafo_reverso.busca_em_profundidade()
+
+        grafo_reverso.exibir_resultado_busca()
+
+        count = 0
+        for vertice in grafo_reverso.getVertices():
+            pai = vertice.get_vertice_pai()
+            if pai is None:
+                count += 1
+
+        return count
+
+    
+    def verificar_semi_fortemente_conexo(self):
+        grafo_nao_direcionado = self.transformar_em_nao_direcionado()
+
         visitados = set()
+        grafo_nao_direcionado.busca_em_profundidade(visitados)
+        
+        return len(visitados) == grafo_nao_direcionado.getNumVertices()
 
-        for vertice in reversed(stack):
-            if vertice not in visitados:
-                componente_atual = []
-                grafo_reverso.busca_em_profundidade(vertice, visitados, componente_atual)
-                componentes.append(componente_atual)
+    def verificar_simplesmente_conexo(self):
+        if self.isEmpty():
+            return False
+        
+        visitados = set()
+        self.busca_em_profundidade(visitados, direcionado=False)
+        
+        return len(visitados) == self.getNumVertices()
 
-        return componentes
+
+    def identificar_conectividade(self):
+        componentes = self.kosaraju()
+        
+        if len(componentes) == 1:
+            print("O grafo é fortemente conexo.")
+            return "fortemente conexo"
+
+        if self.verificar_semi_fortemente_conexo():
+            print("O grafo é semi-fortemente conexo.")
+            return "semi-fortemente conexo"
+
+        if self.verificar_simplesmente_conexo():
+            print("O grafo é simplesmente conexo.")
+            return "simplesmente conexo"
+
+        print("O grafo não é conexo.")
+        return "não conexo"
+
 
