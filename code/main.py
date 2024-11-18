@@ -280,10 +280,8 @@ def busca_profundidade(grafo):
         print("O grafo está vazio, adicione antes de exibir a busca em profundidade!")
         return True
     
-    # Solicita o nome do vértice raiz
     vertice_raiz_nome = input("Digite o nome do primeiro vértice: ").strip()
 
-    # Procura o vértice correspondente ao nome fornecido
     vertice_raiz = None
     for v in grafo.getVertices():
         if v.getNome() == vertice_raiz_nome:
@@ -294,9 +292,15 @@ def busca_profundidade(grafo):
         print("O vértice não existe no grafo.")
         return True
 
-    grafo.busca_em_profundidade(vertice_raiz)
+    
+    visitados = set()
+  
+    grafo.busca_em_profundidade(visitados, start=vertice_raiz)
+
     grafo.exibir_resultado_busca()
+    
     return True
+
 
 def identificarPontes_Articu(grafo):
     pontes = grafo.identificar_pontes()
