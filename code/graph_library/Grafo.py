@@ -34,12 +34,10 @@ class Grafo:
     def reverse(self):
         reverso = Grafo()
         
-        # Copia os vértices
         for vertice in self.getVertices():
             reverso.addVertice(vertice.getNome(), vertice.getPonderacao())
         
-        # Inverte as arestas direcionadas
-        for aresta in self.getArestas():
+        for aresta in self.getAllArestas():
             if aresta.isDirecionada():
                 # Inverte apenas arestas direcionadas
                 reverso.addAresta(
@@ -195,20 +193,29 @@ class Grafo:
         return True
 
     def searchAresta(self, verticeA: str, verticeB: str):
+        # Iterando sobre todas as arestas
         for aresta in self.__lista_de_arestas:
+            # Verificando se a aresta é direcionada
             direcionada = aresta.isDirecionada()
 
-        if direcionada:
-            if aresta.getVerticeA().getNome() == verticeA and aresta.getVerticeB().getNome() == verticeB:          
-                print(f"A aresta direcionada {verticeA} -> {verticeB} existe")
-        else:
-            if (
-                (aresta.getVerticeA().getNome() == verticeA and aresta.getVerticeB().getNome() == verticeB) or 
-                (aresta.getVerticeA().getNome() == verticeB and aresta.getVerticeB().getNome() == verticeA)
-            ):
-                print(f"A aresta não direcionada {verticeA} - {verticeB} existe")
+            # Verificando a existência de uma aresta direcionada
+            if direcionada:
+                if aresta.getVerticeA().getNome() == verticeA and aresta.getVerticeB().getNome() == verticeB:
+                    print(f"A aresta direcionada {verticeA} -> {verticeB} existe")
+                    return True  # Retorna True assim que encontrar a aresta
+            else:
+                # Verificando a existência de uma aresta não direcionada
+                if (
+                    (aresta.getVerticeA().getNome() == verticeA and aresta.getVerticeB().getNome() == verticeB) or 
+                    (aresta.getVerticeA().getNome() == verticeB and aresta.getVerticeB().getNome() == verticeA)
+                ):
+                    print(f"A aresta não direcionada {verticeA} - {verticeB} existe")
+                    return True  # Retorna True assim que encontrar a aresta
 
-        return True
+        # Se não encontrou a aresta, retorna False
+        print(f"A aresta entre {verticeA} e {verticeB} não existe.")
+        return False
+
     
     def addVertice(self, rotulacao: str, ponderacao: int = 0) -> bool:
         for vertice in self.__lista_de_vertices:
@@ -303,10 +310,8 @@ class Grafo:
         num_vertices = self.getNumVertices()
         num_arestas = self.getNumArestas()
         
-        # Inicializa uma matriz de zeros com tamanho adequado
         matriz_incidencia = [[0 for _ in range(num_arestas)] for _ in range(num_vertices)]
         
-        # Dicionário para mapear nomes dos vértices para índices da matriz
         vertice_to_index = {vertice.getNome(): index for index, vertice in enumerate(self.__lista_de_vertices)}
 
         for index_aresta, aresta in enumerate(self.__lista_de_arestas):
@@ -364,7 +369,7 @@ class Grafo:
         
         print("Matriz de Adjacência (linhas = vértices, colunas = vértices):")
         
-        header = "       " + "  ".join(f"{v:2}" for v in vertices)
+        header = "     " + "  ".join(f"{v:2}" for v in vertices)
         print(header)
         
         for vertice, linha in zip(vertices, matriz):
@@ -399,12 +404,17 @@ class Grafo:
             adjacentes_formatados = ", ".join(adjacentes)
             print(f"{vertice}: {adjacentes_formatados}")
 
-    def busca_em_profundidade(self, start):
+    def busca_em_profundidade(self, visitados, start=None, direcionado=True):
+
+        if start is None:
+            if not self.__lista_de_vertices:
+                print("O grafo não possui vértices.")
+                return []
+            start = self.__lista_de_vertices[0]
+
         if start.getNome() not in self.__lista_de_adjacentes:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
-        
-        print(self.exibir_lista_adjacencia())
 
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
@@ -412,13 +422,16 @@ class Grafo:
             v.set_vertice_pai(None)
 
         t = 0
+
+        visitados = set() 
+        
         def busca_profundidade_recursiva(v):
             nonlocal t
+            visitados.add(v.getNome())
             v.set_tempo_descoberta(t)
             t += 1
 
             for adjNome in self.__lista_de_adjacentes[v.getNome()]:
-
                 adj = None
                 for vAdj in self.getVertices():
                     if vAdj.getNome() == adjNome:
@@ -436,11 +449,12 @@ class Grafo:
         t += 1
         busca_profundidade_recursiva(start)
 
-        for v in self.__lista_de_vertices:
-            if v.get_tempo_descoberta() == 0:
-                busca_profundidade_recursiva(v)
+        if not direcionado:
+            for v in self.__lista_de_vertices:
+                if v.get_tempo_descoberta() == 0:
+                    busca_profundidade_recursiva(v)
 
-        return [v.getNome() for v in self.__lista_de_vertices if v.get_tempo_termino() > 0]
+        return visitados
 
     def exibir_resultado_busca(self):
         vertices = self.getVertices()
@@ -464,23 +478,165 @@ class Grafo:
 
             print()
 
-    def kosaraju(grafo):
-        if grafo.isEmpty():
+    def kosaraju(self):
+        if self.isEmpty():
             print("O grafo está vazio. Adicione vértices e arestas antes de executar o algoritmo.")
             return []
 
-        stack = grafo.busca_em_profundidade()
-
-        grafo_reverso = grafo.reverse()
-
-        componentes = []
         visitados = set()
+        self.busca_em_profundidade(visitados=visitados)
 
-        for vertice in reversed(stack):
-            if vertice not in visitados:
-                componente_atual = []
-                grafo_reverso.busca_em_profundidade(vertice, visitados, componente_atual)
-                componentes.append(componente_atual)
+        grafo_reverso = self.reverse()
 
-        return componentes
+        self.__lista_de_vertices = sorted(self.__lista_de_vertices, key=lambda v: v.get_tempo_termino() if v.get_tempo_termino() is not None else float('inf'))
 
+        visitados = set()
+        grafo_reverso.busca_em_profundidade(visitados=visitados)
+
+        count = 0
+        for vertice in grafo_reverso.getVertices():
+            pai = vertice.get_vertice_pai()
+            if pai is None:
+                count += 1
+
+        return count
+
+    def transformar_em_nao_direcionado(self):
+        grafo_nao_direcionado = Grafo()
+        
+        for vertice in self.__lista_de_vertices:
+            grafo_nao_direcionado.addVertice(vertice.getNome(), vertice.getPonderacao())
+        
+        for aresta in self.__lista_de_arestas:
+            verticeA = aresta.getVerticeA().getNome()
+            verticeB = aresta.getVerticeB().getNome()
+            ponderacao = aresta.getPonderacao()
+            rotulacao = aresta.getRotulacao()
+            
+            grafo_nao_direcionado.addAresta(verticeA, verticeB, ponderacao, rotulacao, direcionada=False)
+
+        return grafo_nao_direcionado
+    
+    def verificar_semi_fortemente_conexo(self):
+        grafo_nao_direcionado = self.transformar_em_nao_direcionado()
+
+        visitados = set()
+        grafo_nao_direcionado.busca_em_profundidade(visitados=visitados)
+        
+        return len(visitados) == grafo_nao_direcionado.getNumVertices()
+
+    def verificar_simplesmente_conexo(self):
+        if self.isEmpty():
+            return False
+        
+        visitados = set()
+        self.busca_em_profundidade(visitados, direcionado=False)
+        
+        return len(visitados) == self.getNumVertices()
+
+    def identificar_conectividade(self):
+        numComponentes = self.kosaraju()
+        
+        if numComponentes == 1:
+            print("O grafo é fortemente conexo.")
+            return "fortemente conexo"
+
+        if self.verificar_semi_fortemente_conexo():
+            print("O grafo é semi-fortemente conexo.")
+            return "semi-fortemente conexo"
+
+        if self.verificar_simplesmente_conexo():
+            print("O grafo é simplesmente conexo.")
+            return "simplesmente conexo"
+
+        print("O grafo não é conexo.")
+        return "não conexo"
+
+    def identificar_pontes(self):
+        visitados = set()
+        low = {}
+        descobertas = {}
+        pontes = []
+        t = 0
+
+        for v in self.__lista_de_vertices:
+            low[v.getNome()] = float('inf')
+            descobertas[v.getNome()] = 0
+
+        def dfs_pontes(v):
+            nonlocal t
+            visitados.add(v.getNome())
+            descobertas[v.getNome()] = low[v.getNome()] = t
+            t += 1
+
+            for adjNome in self.__lista_de_adjacentes[v.getNome()]:
+                adj = None
+                for vAdj in self.getVertices():
+                    if vAdj.getNome() == adjNome:
+                        adj = vAdj
+                        break
+
+                if adj.getNome() not in visitados:
+                    adj.set_vertice_pai(v)
+                    dfs_pontes(adj)
+
+                    low[v.getNome()] = min(low[v.getNome()], low[adj.getNome()])
+
+                    if low[adj.getNome()] > descobertas[v.getNome()]:
+                        pontes.append((v.getNome(), adj.getNome()))
+
+                elif adj != v.get_vertice_pai():
+                    low[v.getNome()] = min(low[v.getNome()], descobertas[adj.getNome()])
+
+        for v in self.__lista_de_vertices:
+            if v.getNome() not in visitados:
+                dfs_pontes(v)
+
+        return pontes
+
+    def identificar_articulacoes(self):
+        tempo = 0
+        articulacoes = set()  
+        visitados = set()     
+        tempos_descoberta = {}  
+        tempos_low = {}         
+        pais = {}               
+
+        for v in self.__lista_de_vertices:
+            tempos_descoberta[v.getNome()] = -1  
+            tempos_low[v.getNome()] = -1
+            pais[v.getNome()] = None
+
+    
+        def dfs_articulacao(u):
+            nonlocal tempo
+            visitados.add(u)
+            tempos_descoberta[u] = tempos_low[u] = tempo
+            tempo += 1
+            filhos = 0  
+
+            for v in self.__lista_de_adjacentes[u]:
+                if v not in visitados:
+                    pais[v] = u
+                    filhos += 1
+                    dfs_articulacao(v)
+
+                
+                    tempos_low[u] = min(tempos_low[u], tempos_low[v])
+
+            
+                    if pais[u] is None and filhos > 1:
+                        articulacoes.add(u)
+
+                    if pais[u] is not None and tempos_low[v] >= tempos_descoberta[u]:
+                        articulacoes.add(u)
+
+                elif v != pais[u]:  
+                    tempos_low[u] = min(tempos_low[u], tempos_descoberta[v])
+
+
+        for vertice in self.__lista_de_vertices:
+            if vertice.getNome() not in visitados:
+                dfs_articulacao(vertice.getNome())
+
+        return articulacoes

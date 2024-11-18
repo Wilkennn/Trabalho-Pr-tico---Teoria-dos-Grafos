@@ -298,6 +298,15 @@ def busca_profundidade(grafo):
     grafo.exibir_resultado_busca()
     return True
 
+def identificarPontes_Articu(grafo):
+    pontes = grafo.identificar_pontes()
+    arti = grafo.identificar_articulacoes()
+    
+    print("Pontes: ", pontes)
+    print("Articulações: ", arti)
+
+    return True
+
 def main():
     grafo = Grafo()
 
@@ -317,7 +326,8 @@ def main():
         '12' :lambda: matriz_incidencia(grafo),
         '13' :lambda: matriz_adjacencia(grafo),
         '14' :lambda: lista_adjacencia(grafo),
-        '15' :lambda: busca_profundidade(grafo)
+        '15' :lambda: busca_profundidade(grafo),
+        '16' :lambda: identificarPontes_Articu(grafo)
     }
 
     while True:
@@ -340,6 +350,7 @@ def main():
         print("13 - Gerar Matriz Adjacência")
         print("14 - Gerar Lista Adjacência")
         print("15 - Executar Busca em Profundidade")
+        print("16 - Identificar Pontes e Articulações")
         opcao = input(("\033[1;31m>\033[0m " ))
         print("")
         
