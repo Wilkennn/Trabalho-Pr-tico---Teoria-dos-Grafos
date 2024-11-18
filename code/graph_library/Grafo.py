@@ -395,8 +395,8 @@ class Grafo:
             adjacentes_formatados = ", ".join(adjacentes)
             print(f"{vertice}: {adjacentes_formatados}")
 
+    
     def busca_em_profundidade(self, visitados, start=None, direcionado=True):
-
         if start is None:
             if not self.__lista_de_vertices:
                 print("O grafo não possui vértices.")
@@ -407,42 +407,68 @@ class Grafo:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
 
+        # Inicializações
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
             v.set_tempo_descoberta(0)
             v.set_vertice_pai(None)
 
-        t = 0
-        def busca_profundidade_recursiva(v):
-            nonlocal t
-            visitados.add(v.getNome())
-            v.set_tempo_descoberta(t)
-            t += 1
+        discovery_time = {}  # Tempo de descoberta
+        low_time = {}        # Menor tempo alcançável
+        pontes = []          # Lista de pontes
+        articulacoes = set() # Conjunto de articulações
+        tempo = 0
 
-            for adjNome in self.__lista_de_adjacentes[v.getNome()]:
-                adj = None
-                for vAdj in self.getVertices():
-                    if vAdj.getNome() == adjNome:
-                        adj = vAdj
+        def dfs(u):
+            nonlocal tempo
+            visitados.add(u)
+            discovery_time[u] = low_time[u] = tempo
+            tempo += 1
+            filhos = 0
+
+            for v_nome in self.__lista_de_adjacentes[u]:
+                v = None
+                for vertice in self.getVertices():
+                    if vertice.getNome() == v_nome:
+                        v = vertice
                         break
 
-                if adj.get_tempo_descoberta() == 0:
-                    adj.set_vertice_pai(v)
-                    busca_profundidade_recursiva(adj)
+                if v.getNome() not in visitados:
+                    v.set_vertice_pai(u)
+                    filhos += 1
+                    dfs(v.getNome())
 
-            v.set_tempo_termino(t)
-            t += 1
+                    # Atualiza low_time[u] para o menor tempo alcançável
+                    low_time[u] = min(low_time[u], low_time[v.getNome()])
+    
+                    # Verifica se (u, v) é uma ponte
+                    if low_time[v.getNome()] > discovery_time[u]:
+                        pontes.append((u, v.getNome()))
 
-        start.set_tempo_descoberta(t)
-        t += 1
-        busca_profundidade_recursiva(start)
+                    # Verifica se u é uma articulação
+                    if v.get_vertice_pai() is None and filhos > 1:
+                        articulacoes.add(u)
+                    if v.get_vertice_pai() is not None and low_time[v.getNome()] >= discovery_time[u]:
+                        articulacoes.add(u)
+
+                    elif v.getNome() != u:  # Aresta de retorno
+                        low_time[u] = min(low_time[u], discovery_time[v.getNome()])
+
+                u.set_tempo_termino(tempo)
+                tempo += 1
+
+        # Começa a busca em profundidade
+        start.set_tempo_descoberta(tempo)
+        tempo += 1
+        dfs(start.getNome())
 
         if not direcionado:
             for v in self.__lista_de_vertices:
                 if v.get_tempo_descoberta() == 0:
-                    busca_profundidade_recursiva(v)
+                    dfs(v.getNome())
 
-        return visitados
+        return pontes, articulacoes
+
 
     def exibir_resultado_busca(self):
         vertices = self.getVertices()
@@ -540,4 +566,91 @@ class Grafo:
         print("O grafo não é conexo.")
         return "não conexo"
 
+    def identificar_pontes(self):
+        visitados = set()
+        low = {}
+        descobertas = {}
+        pontes = []
+        t = 0
 
+        for v in self.__lista_de_vertices:
+            low[v.getNome()] = float('inf')
+            descobertas[v.getNome()] = 0
+
+        def dfs_pontes(v):
+            nonlocal t
+            visitados.add(v.getNome())
+            descobertas[v.getNome()] = low[v.getNome()] = t
+            t += 1
+
+            for adjNome in self.__lista_de_adjacentes[v.getNome()]:
+                adj = None
+                for vAdj in self.getVertices():
+                    if vAdj.getNome() == adjNome:
+                        adj = vAdj
+                        break
+
+                if adj.getNome() not in visitados:
+                    adj.set_vertice_pai(v)
+                    dfs_pontes(adj)
+
+                    low[v.getNome()] = min(low[v.getNome()], low[adj.getNome()])
+
+                    if low[adj.getNome()] > descobertas[v.getNome()]:
+                        pontes.append((v.getNome(), adj.getNome()))
+
+                elif adj != v.get_vertice_pai():
+                    low[v.getNome()] = min(low[v.getNome()], descobertas[adj.getNome()])
+
+        for v in self.__lista_de_vertices:
+            if v.getNome() not in visitados:
+                dfs_pontes(v)
+
+        return pontes
+
+    def identificar_articulacoes(self):
+        tempo = 0
+        articulacoes = set()  
+        visitados = set()     
+        tempos_descoberta = {}  
+        tempos_low = {}         
+        pais = {}               
+
+        for v in self.__lista_de_vertices:
+            tempos_descoberta[v.getNome()] = -1  
+            tempos_low[v.getNome()] = -1
+            pais[v.getNome()] = None
+
+    
+        def dfs_articulacao(u):
+            nonlocal tempo
+            visitados.add(u)
+            tempos_descoberta[u] = tempos_low[u] = tempo
+            tempo += 1
+            filhos = 0  
+
+            for v in self.__lista_de_adjacentes[u]:
+                if v not in visitados:
+                    pais[v] = u
+                    filhos += 1
+                    dfs_articulacao(v)
+
+                
+                    tempos_low[u] = min(tempos_low[u], tempos_low[v])
+
+            
+                    if pais[u] is None and filhos > 1:
+                        articulacoes.add(u)
+
+                    if pais[u] is not None and tempos_low[v] >= tempos_descoberta[u]:
+                        articulacoes.add(u)
+
+                elif v != pais[u]:  
+                    tempos_low[u] = min(tempos_low[u], tempos_descoberta[v])
+
+
+        for vertice in self.__lista_de_vertices:
+            if vertice.getNome() not in visitados:
+                dfs_articulacao(vertice.getNome())
+
+        return articulacoes
