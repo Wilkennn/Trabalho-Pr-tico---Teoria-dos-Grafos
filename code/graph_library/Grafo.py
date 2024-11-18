@@ -301,10 +301,8 @@ class Grafo:
         num_vertices = self.getNumVertices()
         num_arestas = self.getNumArestas()
         
-        # Inicializa uma matriz de zeros com tamanho adequado
         matriz_incidencia = [[0 for _ in range(num_arestas)] for _ in range(num_vertices)]
         
-        # Dicionário para mapear nomes dos vértices para índices da matriz
         vertice_to_index = {vertice.getNome(): index for index, vertice in enumerate(self.__lista_de_vertices)}
 
         for index_aresta, aresta in enumerate(self.__lista_de_arestas):
@@ -362,7 +360,7 @@ class Grafo:
         
         print("Matriz de Adjacência (linhas = vértices, colunas = vértices):")
         
-        header = "       " + "  ".join(f"{v:2}" for v in vertices)
+        header = "     " + "  ".join(f"{v:2}" for v in vertices)
         print(header)
         
         for vertice, linha in zip(vertices, matriz):
@@ -397,7 +395,7 @@ class Grafo:
             adjacentes_formatados = ", ".join(adjacentes)
             print(f"{vertice}: {adjacentes_formatados}")
 
-    def busca_em_profundidade(self, start=None):
+    def busca_em_profundidade(self, visitados, start=None, direcionado=True):
 
         if start is None:
             if not self.__lista_de_vertices:
@@ -408,7 +406,7 @@ class Grafo:
         if start.getNome() not in self.__lista_de_adjacentes:
             print(f"O vértice '{start.getNome()}' não existe no grafo.")
             return []
-                
+
         for v in self.__lista_de_vertices:
             v.set_tempo_termino(0)
             v.set_tempo_descoberta(0)
@@ -417,11 +415,11 @@ class Grafo:
         t = 0
         def busca_profundidade_recursiva(v):
             nonlocal t
+            visitados.add(v.getNome())
             v.set_tempo_descoberta(t)
             t += 1
 
             for adjNome in self.__lista_de_adjacentes[v.getNome()]:
-
                 adj = None
                 for vAdj in self.getVertices():
                     if vAdj.getNome() == adjNome:
@@ -439,11 +437,12 @@ class Grafo:
         t += 1
         busca_profundidade_recursiva(start)
 
-        for v in self.__lista_de_vertices:
-            if v.get_tempo_descoberta() == 0:
-                busca_profundidade_recursiva(v)
+        if not direcionado:
+            for v in self.__lista_de_vertices:
+                if v.get_tempo_descoberta() == 0:
+                    busca_profundidade_recursiva(v)
 
-        return [v.getNome() for v in self.__lista_de_vertices if v.get_tempo_termino() > 0]
+        return visitados
 
     def exibir_resultado_busca(self):
         vertices = self.getVertices()
@@ -472,15 +471,15 @@ class Grafo:
             print("O grafo está vazio. Adicione vértices e arestas antes de executar o algoritmo.")
             return []
 
-        self.busca_em_profundidade()
+        visitados = set()
+        self.busca_em_profundidade(visitados=visitados)
 
         grafo_reverso = self.reverse()
 
         self.__lista_de_vertices = sorted(self.__lista_de_vertices, key=lambda v: v.get_tempo_termino() if v.get_tempo_termino() is not None else float('inf'))
 
-        grafo_reverso.busca_em_profundidade()
-
-        grafo_reverso.exibir_resultado_busca()
+        visitados = set()
+        grafo_reverso.busca_em_profundidade(visitados=visitados)
 
         count = 0
         for vertice in grafo_reverso.getVertices():
@@ -490,12 +489,27 @@ class Grafo:
 
         return count
 
+    def transformar_em_nao_direcionado(self):
+        grafo_nao_direcionado = Grafo()
+        
+        for vertice in self.__lista_de_vertices:
+            grafo_nao_direcionado.addVertice(vertice.getNome(), vertice.getPonderacao())
+        
+        for aresta in self.__lista_de_arestas:
+            verticeA = aresta.getVerticeA().getNome()
+            verticeB = aresta.getVerticeB().getNome()
+            ponderacao = aresta.getPonderacao()
+            rotulacao = aresta.getRotulacao()
+            
+            grafo_nao_direcionado.addAresta(verticeA, verticeB, ponderacao, rotulacao, direcionada=False)
+
+        return grafo_nao_direcionado
     
     def verificar_semi_fortemente_conexo(self):
         grafo_nao_direcionado = self.transformar_em_nao_direcionado()
 
         visitados = set()
-        grafo_nao_direcionado.busca_em_profundidade(visitados)
+        grafo_nao_direcionado.busca_em_profundidade(visitados=visitados)
         
         return len(visitados) == grafo_nao_direcionado.getNumVertices()
 
@@ -508,11 +522,10 @@ class Grafo:
         
         return len(visitados) == self.getNumVertices()
 
-
     def identificar_conectividade(self):
-        componentes = self.kosaraju()
+        numComponentes = self.kosaraju()
         
-        if len(componentes) == 1:
+        if numComponentes == 1:
             print("O grafo é fortemente conexo.")
             return "fortemente conexo"
 
