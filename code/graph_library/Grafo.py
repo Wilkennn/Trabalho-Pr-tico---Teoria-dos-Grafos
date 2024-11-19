@@ -138,6 +138,7 @@ class Grafo:
                 self.__lista_de_adjacentes.setdefault(verticeA, []).append(verticeB)
                 self.__predecessores.setdefault(verticeB, []).append(verticeA)
                 self.__sucessores.setdefault(verticeA, []).append(verticeB)
+                self.__direcionado = True
                 print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
             else:
                 print("Aresta direcionada já existe. Aresta não adicionada.")
@@ -535,9 +536,10 @@ class Grafo:
         return len(visitados) == self.getNumVertices()
 
     def identificar_conectividade(self):
-        numComponentes = self.kosaraju()
         
-        if numComponentes == 1:
+        numComponentes = self.kosaraju()
+
+        if not self.__direcionado or numComponentes == 1:
             print("O grafo é fortemente conexo.")
             return "fortemente conexo"
 
