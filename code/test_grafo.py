@@ -17,6 +17,7 @@ if __name__ == "__main__":
     # grafo.addVertice("H", 3)
 
     # Criando arestas
+<<<<<<< HEAD
     grafo.addAresta("A", "B", ponderacao=10, rotulacao="Aresta1", direcionada=False)
     grafo.addAresta("B", "C", ponderacao=5, rotulacao="Aresta2", direcionada=False)
     # grafo.addAresta("B", "D", ponderacao=10, rotulacao="Aresta1", direcionada=False)
@@ -38,6 +39,26 @@ if __name__ == "__main__":
 
     arti = grafo.identificar_articulacoes()
     print(arti)
+=======
+    # grafo.addAresta("1", "2", ponderacao=10, rotulacao="Aresta1", direcionada=True)
+    # grafo.addAresta("2", "3", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+    # grafo.addAresta("3", "4", ponderacao=10, rotulacao="Aresta1", direcionada=True)
+    # grafo.addAresta("2", "4", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+    # grafo.addAresta("2", "3", ponderacao=10, rotulacao="Aresta1", direcionada=True)
+    # grafo.addAresta("3", "4", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+    # grafo.addAresta("6", "7", ponderacao=10, rotulacao="Aresta1", direcionada=True)
+    # grafo.addAresta("3", "6", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+    # grafo.addAresta("1", "4", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+    # grafo.addAresta("4", "6", ponderacao=5, rotulacao="Aresta2", direcionada=True)
+
+    # Exibindo a lista de adjacência
+
+    # pontes = grafo.identificar_pontes()
+    # print(pontes)
+
+    # arti = grafo.identificar_articulacoes()
+    # print(arti)
+>>>>>>> 9f0da4596206206fe8cad41dc5a680dcc2638815
     # grafo.exibir_matriz_incidencia()
     # grafo.exibir_matriz_adjacencia()
-    # grafo.exibir_lista_adjacencia()
+    print(grafo.kosaraju())

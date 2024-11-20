@@ -531,9 +531,10 @@ class Grafo:
         return len(visitados) == self.getNumVertices()
 
     def identificar_conectividade(self):
-        numComponentes = self.kosaraju()
         
-        if numComponentes == 1:
+        numComponentes = self.kosaraju()
+
+        if not self.__direcionado or numComponentes == 1:
             print("O grafo é fortemente conexo.")
             return "fortemente conexo"
 
