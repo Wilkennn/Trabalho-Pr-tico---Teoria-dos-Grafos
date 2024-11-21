@@ -2,6 +2,10 @@ from typing import List, Dict
 from graph_library.Aresta import Aresta
 from graph_library.Vertice import Vertice
 
+import random
+import string
+import xml.etree.ElementTree as ET
+
 class Grafo:
 
     def __init__(self, isDirecionado=False):
@@ -85,6 +89,30 @@ class Grafo:
     
     def getNumArestas(self) -> int:
         return len(self.__lista_de_arestas)
+
+    @staticmethod
+    def gerar_grafo_aleatorio(num_vertices=10, num_arestas=15):
+
+        grafo = Grafo()
+
+        for i in range(1, num_vertices + 1):
+            id_vertice = str(i)
+            peso = random.randint(1, 10)
+            grafo.addVertice(id_vertice, peso)
+
+        for _ in range(num_arestas):
+            origem = str(random.randint(1, num_vertices))
+            destino = str(random.randint(1, num_vertices))
+            while origem == destino:
+                destino = str(random.randint(1, num_vertices))
+            
+            ponderacao = random.randint(1, 100)
+            rotulacao = random.choice(string.ascii_uppercase)
+            direcionada = random.choice([True, False])
+
+            grafo.addAresta(origem, destino, ponderacao=ponderacao, rotulacao=rotulacao, direcionada=direcionada)
+
+        return grafo
     
     def areAdjV(self, verticeA: str, verticeB: str) -> bool:
         for aresta in self.__lista_de_arestas:
@@ -598,14 +626,14 @@ class Grafo:
 
     def identificar_articulacoes(self):
         tempo = 0
-        articulacoes = set()  
-        visitados = set()     
-        tempos_descoberta = {}  
-        tempos_low = {}         
-        pais = {}               
+        articulacoes = set()
+        visitados = set()
+        tempos_descoberta = {}
+        tempos_low = {}
+        pais = {}
 
         for v in self.__lista_de_vertices:
-            tempos_descoberta[v.getNome()] = -1  
+            tempos_descoberta[v.getNome()] = -1 
             tempos_low[v.getNome()] = -1
             pais[v.getNome()] = None
 
@@ -633,7 +661,7 @@ class Grafo:
                     if pais[u] is not None and tempos_low[v] >= tempos_descoberta[u]:
                         articulacoes.add(u)
 
-                elif v != pais[u]:  
+                elif v != pais[u]:
                     tempos_low[u] = min(tempos_low[u], tempos_descoberta[v])
 
 
@@ -642,3 +670,27 @@ class Grafo:
                 dfs_articulacao(vertice.getNome())
 
         return articulacoes
+    
+    def exportar_para_gexf(self, nome_arquivo: str):
+
+        gexf = ET.Element("gexf", xmlns="http://www.gexf.net/1.2draft", version="1.2")
+        graph = ET.SubElement(gexf, "graph", defaultedgetype="directed" if self.__direcionado else "undirected", mode="static")
+
+        nodes = ET.SubElement(graph, "nodes")
+        for vertice in self.__lista_de_vertices:
+            ET.SubElement(nodes, "node", id=vertice.getNome(), label=vertice.getNome())
+
+        edges = ET.SubElement(graph, "edges")
+        for index, aresta in enumerate(self.__lista_de_arestas):
+            edge_attribs = {
+                "id": str(index),
+                "source": aresta.getVerticeA().getNome(),
+                "target": aresta.getVerticeB().getNome(),
+            }
+            if aresta.isDirecionada():
+                edge_attribs["type"] = "directed"
+            ET.SubElement(edges, "edge", **edge_attribs)
+
+        # Salvar no arquivo
+        tree = ET.ElementTree(gexf)
+        tree.write(nome_arquivo, encoding="utf-8", xml_declaration=True)
