@@ -7,7 +7,7 @@ setup(
     description='Uma biblioteca para implementação de algoritmos em grafos',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    author='Arthur Freitas Jardim, Wilken Henrique Moreira',  # Nome do autor
+    author='Arthur Freitas Jardim, Wilken Henrique Moreira',
     author_email='arthurfreitasjardim@gmail.com, wilken.henrique2513@gmail.com',
     url='https://github.com/Wilkennn/Trabalho-Pratico-Teoria-dos-Grafos',
     license='MIT',
