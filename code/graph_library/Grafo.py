@@ -18,13 +18,12 @@ class Grafo:
 
     def copy(self):
         copia = Grafo()
-        
-        # Copia os vértices
+                
         for vertice in self.getVertices():
             copia.addVertice(vertice.getNome(), vertice.getPonderacao())
         
         # Copia as arestas
-        for aresta in self.getArestas():
+        for aresta in self.getAllArestas():
             copia.addAresta(
                 aresta.getVerticeA().getNome(),
                 aresta.getVerticeB().getNome(),
@@ -89,6 +88,19 @@ class Grafo:
     
     def getNumArestas(self) -> int:
         return len(self.__lista_de_arestas)
+
+    def getArestasAdjacentes(self, vertice):
+        if not any(v.getNome() == vertice for v in self.__lista_de_vertices):
+            print(f"O vértice '{vertice}' não existe no grafo.")
+            return []
+
+        arestas_adjacentes = [
+            aresta for aresta in self.__lista_de_arestas
+            if aresta.getVerticeA().getNome() == vertice or aresta.getVerticeB().getNome() == vertice
+        ]
+
+        return arestas_adjacentes
+
 
     @staticmethod
     def gerar_grafo_aleatorio(num_vertices=10, num_arestas=15):
@@ -166,7 +178,7 @@ class Grafo:
                 self.__sucessores.setdefault(verticeA, []).append(verticeB)
                 if self.__direcionado is None:
                     self.__direcionado = True
-                print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
+                # print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
             else:
                 print("Aresta direcionada já existe. Aresta não adicionada.")
         else:
@@ -178,7 +190,7 @@ class Grafo:
                 self.__lista_de_adjacentes.setdefault(verticeA, []).append(verticeB)
                 self.__lista_de_adjacentes.setdefault(verticeB, []).append(verticeA)
                 self.__direcionado = False 
-                print(f"Aresta não direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
+                # print(f"Aresta não direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
             else:
                 print("Aresta não direcionada já existe. Aresta não adicionada.")
     
@@ -253,10 +265,10 @@ class Grafo:
         self.__sucessores[rotulacao] = []
         self.__predecessores[rotulacao] = []
 
-        if ponderacao != 0:
-            print(f"Vértice '{rotulacao}' com ponderação {ponderacao} adicionado ao grafo.")
-        else:
-            print(f"Vértice '{rotulacao}' adicionado ao grafo.")
+        # if ponderacao != 0:
+        #     print(f"Vértice '{rotulacao}' com ponderação {ponderacao} adicionado ao grafo.")
+        # else:
+        #     print(f"Vértice '{rotulacao}' adicionado ao grafo.")
 
         return True
 
@@ -562,7 +574,7 @@ class Grafo:
         
         numComponentes = self.kosaraju()
 
-        if not self.__direcionado or numComponentes == 1:
+        if not self.__direcionado and numComponentes == 1:
             print("O grafo é fortemente conexo.")
             return "fortemente conexo"
 
@@ -622,6 +634,7 @@ class Grafo:
 
     def identificar_pontesNaive(self):
         pontes = []
+        print("Iniciando identificação das pontes...")  # Log de início
         for aresta in self.__lista_de_arestas:
             verticeA = aresta.getVerticeA().getNome()
             verticeB = aresta.getVerticeB().getNome()
@@ -629,13 +642,21 @@ class Grafo:
             rotulacao = aresta.getRotulacao()
             direcionada = aresta.isDirecionada()
 
+            print(f"Analisando aresta: {verticeA} - {verticeB}")  # Log da aresta sendo analisada
             self.removeAresta(verticeA, verticeB)
+            print(f"Aresta {verticeA} - {verticeB} removida.")  # Log de remoção da aresta
 
-            if self.identificar_conectividade() == "não conexo":
+            conectividade = self.identificar_conectividade()
+            print(f"Conectividade após remoção: {conectividade}")  # Log da conectividade após remoção
+        
+            if conectividade == "não conexo":
+                print(f"Encontrada ponte: {verticeA} - {verticeB}")  # Log quando encontrar uma ponte
                 pontes.append((verticeA, verticeB))
 
-        
             self.addAresta(verticeA, verticeB, ponderacao, rotulacao, direcionada)
+            print(f"Aresta {verticeA} - {verticeB} re-adicionada.")  # Log de adição da aresta
+
+        print("Identificação de pontes concluída.")  # Log de fim
         return pontes
 
     def identificar_articulacoes(self):
@@ -708,6 +729,11 @@ class Grafo:
     def isEuleriano(self):
         print(self.__direcionado)
 
+        # Verificar se o grafo tem arestas
+        if not any(self.__lista_de_adjacentes.values()):
+            print("O grafo não possui arestas. Não é euleriano.")
+            return False
+
         if self.__direcionado:
             conectividade = self.identificar_conectividade()
             if not conectividade == 'fortemente conexo':
@@ -744,39 +770,58 @@ class Grafo:
             print("O grafo não é euleriano!")
             return False
 
+
     
     def algoritmo_de_fleury(self):
         if not self.isEuleriano():
             print("O grafo não é euleriano.")
             return None
-    
-        caminho = []
-    
-        grafo_copia = self.copy()
-    
-        vertice_inicial = None
-        for v in grafo_copia.getVertices():
-            if len(grafo_copia.getArestasAdjacentes(v)) % 2 != 0:
-                vertice_inicial = v
-                break
-        if vertice_inicial is None:
-            vertice_inicial = grafo_copia.getVertices()[0]
-    
-        def fleury(v):
-            for adjNome in grafo_copia.getArestasAdjacentes(v):
-                adj = grafo_copia.getVertice(adjNome)
-            
-                if self.is_conexo_removendo(v, adj):
-                    caminho.append((v.getNome(), adj.getNome()))
-                    grafo_copia.removeAresta(v, adj)
-                    fleury(adj)
-                    return
 
-                caminho.append((v.getNome(), adj.getNome()))
-                grafo_copia.remover_aresta(v, adj)
-                fleury(adj)
+        caminho = []
+        print(self.getVertices())
+        grafo_copia = self.copy()  # Criar uma cópia do grafo
+        print("Lista de vértices no grafo copiado:", [v.getNome() for v in grafo_copia.getVertices()])
+        print("Lista de arestas no grafo copiado:", [(a.getVerticeA().getNome(), a.getVerticeB().getNome()) for a in grafo_copia.getAllArestas()])
+
+        pontes = grafo_copia.identificar_pontesTarjan()  # Identificar pontes usando Tarjan
+        print("Pontes identificadas:", pontes)
+
+        vertice_inicial = None
+    
+        # Encontrar vértice inicial (com grau ímpar)
+        for v in grafo_copia.getVertices():
+            print(f"Verificando vértice: {v}")
+            if len(grafo_copia.getArestasAdjacentes(v)) % 2 != 0:  
+                vertice_inicial = v
+                print(f"Vértice inicial escolhido: {vertice_inicial}")
+                break
+    
+        if vertice_inicial is None:
+            vertice_inicial = grafo_copia.getVertices()[0]  # Se todos têm grau par, escolher o primeiro
+            print(f"Vértice inicial padrão escolhido: {vertice_inicial}")
+
+        # Função recursiva para o algoritmo de Fleury
+        def fleury(v):
+            print(f"Iniciando recursão em: {v}")
+            for aresta in grafo_copia.getArestasAdjacentes(v):
+                adj = aresta.getVerticeB().getNome() if aresta.getVerticeA().getNome() == v else aresta.getVerticeA().getNome()
+                print(f"Verificando aresta: ({v}, {adj})")
+         
+                if (v, adj) in pontes or (adj, v) in pontes:           
+                    if len(grafo_copia.getArestasAdjacentes(v)) > 1:
+                        print(f"Aresta ({v}, {adj}) é uma ponte e há outras opções. Pulando essa aresta.")
+                        continue
+               
+                print(f"Aresta ({v}, {adj}) adicionada ao caminho.")
+                caminho.append((v, adj))
+                grafo_copia.removeAresta(v, adj)  # Remover a aresta do grafo
+                print(f"Aresta ({v}, {adj}) removida do grafo.")
+                 
+                fleury(adj)  # Recursão para o próximo vértice
                 return
 
+        print(f"Iniciando o Algoritmo de Fleury a partir do vértice: {vertice_inicial}")
         fleury(vertice_inicial)
-    
+
+        print("Caminho final:", caminho)
         return caminho

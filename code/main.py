@@ -302,14 +302,14 @@ def busca_profundidade(grafo):
     return True
 
 def identificarPontes_Articu(grafo):
-    # pontes = grafo.identificar_pontesTarjan()
-    # arti = grafo.identificar_articulacoes()
-    # p2 = grafo.identificar_pontesNaive()
+    pontes = grafo.identificar_pontesTarjan()
+    arti = grafo.identificar_articulacoes()
+    p2 = grafo.identificar_pontesNaive()
     grafo.isEuleriano()
 
-    # print("Pontes: ", pontes)
-    # print("Pontes Naive : ", p2)
-    # print("Articulações: ", arti)
+    print("Pontes: ", pontes)
+    print("Pontes Naive : ", p2)
+    print("Articulações: ", arti)
 
     return True
 
