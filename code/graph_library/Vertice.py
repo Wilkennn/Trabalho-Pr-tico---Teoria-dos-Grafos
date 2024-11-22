@@ -11,28 +11,28 @@ class Vertice:
         self.__tempo_descoberta = None;
         self.__vertice_pai = None;
     
-    def set_tempo_termino(self, tempo_termino: int) -> None:
+    def definir_tempo_termino(self, tempo_termino: int) -> None:
         self.__tempo_termino = tempo_termino
 
-    def get_tempo_termino(self) -> int:
+    def obter_tempo_termino(self) -> int:
         return self.__tempo_termino
     
     def set_tempo_descoberta(self, tempo_descoberta: int) -> None:
         self.__tempo_descoberta = tempo_descoberta
     
-    def get_tempo_descoberta(self) -> int:
+    def obter__tempo_descoberta(self) -> int:
         return self.__tempo_descoberta
     
     def set_vertice_pai(self, vertice_pai: 'Vertice') -> None:
         self.__vertice_pai = vertice_pai
 
-    def get_vertice_pai(self) -> 'Vertice':
+    def obter_vertice_pai(self) -> 'Vertice':
         return self.__vertice_pai
     
-    def getNome(self):
+    def obter_nome(self):
         return self.__rotulacao
 
-    def getPonderacao(self):
+    def obter_ponderacao(self):
         return self.__ponderacao
 
     def __str__(self):
@@ -43,12 +43,12 @@ class Vertice:
 
     def __eq__(self, other):
         if isinstance(other, Vertice):
-            return self.__rotulacao == other.getNome()
+            return self.__rotulacao == other.obter_nome()
         return False
 
     def __lt__(self, other):
         if isinstance(other, Vertice):
-            return self.getNome() < other.getNome()
+            return self.obter_nome() < other.obter_nome()
         return NotImplemented
 
     def __hash__(self):
