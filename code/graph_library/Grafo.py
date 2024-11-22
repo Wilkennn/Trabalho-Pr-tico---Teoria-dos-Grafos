@@ -22,7 +22,7 @@ class Grafo:
         for vertice in self.obter_vertices():
             copia.adicionar_vertice(vertice.obter_nome(), vertice.obter_ponderacao())
         
-        for aresta in self.obter_arestas():
+        for aresta in self.obter_todas_arestas():
             copia.adicionar_aresta(
                 aresta.obter_vertice_A().obter_nome(),
                 aresta.obter_vertice_B().obter_nome(),
@@ -86,6 +86,16 @@ class Grafo:
     
     def obter_numero_arestas(self) -> int:
         return len(self.__lista_de_arestas)
+    
+    def obter_arestas_ajacentes_ao_vertice(self, vertice):
+        arestas_adjacentes = []
+
+        for aresta in self.__lista_de_arestas:
+            # Verifica se o vértice A ou B da aresta é igual ao vértice passado como argumento
+            if aresta.obter_vertice_A() == vertice or aresta.obter_vertice_B() == vertice:
+                arestas_adjacentes.append(aresta)
+
+        return arestas_adjacentes
 
     @staticmethod
     def gerar_grafo_aleatorio(num_vertices=10, num_arestas=15):
@@ -163,9 +173,9 @@ class Grafo:
                 self.__sucessores.setdefault(verticeA, []).append(verticeB)
                 if self.__direcionado is None:
                     self.__direcionado = True
-                print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
-            else:
-                print("Aresta direcionada já existe. Aresta não adicionada.")
+            #     print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
+            # else:
+            #     print("Aresta direcionada já existe. Aresta não adicionada.")
         else:
             if not any(
                 (a.obter_vertice_A() == vA and a.obter_vertice_B() == vB) or
@@ -175,9 +185,9 @@ class Grafo:
                 self.__lista_de_adjacentes.setdefault(verticeA, []).append(verticeB)
                 self.__lista_de_adjacentes.setdefault(verticeB, []).append(verticeA)
                 self.__direcionado = False
-                print(f"Aresta não direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
-            else:
-                print("Aresta não direcionada já existe. Aresta não adicionada.")
+            #     print(f"Aresta não direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
+            # else:
+            #     print("Aresta não direcionada já existe. Aresta não adicionada.")
     
         return True
 
@@ -210,10 +220,10 @@ class Grafo:
 
         arestas_removidas = True
 
-        if arestas_removidas:
-            print(f"Aresta entre '{verticeA}' e '{verticeB}' removida com sucesso.")
-        else:
-            print("Falha ao remover a aresta ou a aresta não existe.")
+        # if arestas_removidas:
+        #     print(f"Aresta entre '{verticeA}' e '{verticeB}' removida com sucesso.")
+        # else:
+        #     print("Falha ao remover a aresta ou a aresta não existe.")
 
         return True
 
@@ -249,10 +259,10 @@ class Grafo:
         self.__sucessores[rotulacao] = []
         self.__predecessores[rotulacao] = []
 
-        if ponderacao != 0:
-            print(f"Vértice '{rotulacao}' com ponderação {ponderacao} adicionado ao grafo.")
-        else:
-            print(f"Vértice '{rotulacao}' adicionado ao grafo.")
+        # if ponderacao != 0:
+        #     print(f"Vértice '{rotulacao}' com ponderação {ponderacao} adicionado ao grafo.")
+        # else:
+        #     print(f"Vértice '{rotulacao}' adicionado ao grafo.")
 
         return True
 
@@ -274,7 +284,7 @@ class Grafo:
             if aresta.obter_vertice_A() != rotulacao and aresta.obter_vertice_B() != rotulacao
         ]
 
-        print(f"Vértice '{rotulacao}' removido com sucesso.")
+        # print(f"Vértice '{rotulacao}' removido com sucesso.")
         return True
     
     def esta_vazio(self) -> bool:
@@ -427,9 +437,9 @@ class Grafo:
             return []
 
         for v in self.__lista_de_vertices:
-            v.set_tempo_termino(0)
-            v.set_tempo_descoberta(0)
-            v.set_vertice_pai(None)
+            v.obter_tempo_termino()
+            v.obter_tempo_descoberta()
+            v.obter_vertice_pai()
 
         t = 0
 
@@ -448,7 +458,7 @@ class Grafo:
                         adj = vAdj
                         break
 
-                if adj.get_tempo_descoberta() == 0:
+                if adj.set_tempo_descoberta(0) == 0:
                     adj.set_vertice_pai(v)
                     busca_profundidade_recursiva(adj)
 
@@ -461,7 +471,7 @@ class Grafo:
 
         if not direcionado:
             for v in self.__lista_de_vertices:
-                if v.get_tempo_descoberta() == 0:
+                if v.obter_tempo_descoberta() == 0:
                     busca_profundidade_recursiva(v)
 
         return visitados
@@ -479,12 +489,12 @@ class Grafo:
 
             for v in vertices:
                 if atributo == 'Pai':
-                    pai_nome = v.get_vertice_pai().obter_nome() if v.get_vertice_pai() else "Nenhum"
+                    pai_nome = v.obter_vertice_pai().obter_nome() if v.obter_vertice_pai() else "Nenhum"
                     print(f"{pai_nome:<10}", end=" ")
                 elif atributo == 'Tempo Descoberta':
-                    print(f"{v.get_tempo_descoberta():<10}", end=" ")
+                    print(f"{v.obter_tempo_descoberta():<10}", end=" ")
                 elif atributo == 'Tempo Término':
-                    print(f"{v.get_tempo_termino():<10}", end=" ")
+                    print(f"{v.obter_tempo_termino():<10}", end=" ")
 
             print()
 
@@ -498,32 +508,42 @@ class Grafo:
 
         grafo_reverso = self.inverter()
 
-        self.__lista_de_vertices = sorted(self.__lista_de_vertices, key=lambda v: v.get_tempo_termino() if v.get_tempo_termino() is not None else float('inf'))
+        self.__lista_de_vertices = sorted(self.__lista_de_vertices, key=lambda v: v.obter_tempo_termino() if v.obter_tempo_termino() is not None else float('inf'))
 
         visitados = set()
-        grafo_reverso.busca_em_profundidade(visitados=visitados)
-
         count = 0
-        for vertice in grafo_reverso.obter_vertices():
-            pai = vertice.get_vertice_pai()
-            if pai is None:
+        for vertice in self.__lista_de_vertices:
+            if vertice not in visitados:
+                self.busca_em_profundidade_no_reverso(vertice, visitados, grafo_reverso)
                 count += 1
 
         return count
 
+    def busca_em_profundidade_no_reverso(self, vertice, visitados, grafo_reverso):
+        visitados.add(vertice)
+    
+        arestas_adjacentes = grafo_reverso.obter_arestas_ajacentes_ao_vertice(vertice)
+    
+        for aresta in arestas_adjacentes:
+            adjacente = aresta.obter_vertice_A() if aresta.obter_vertice_B() == vertice else aresta.obter_vertice_B()
+
+            if adjacente not in visitados:
+                self.busca_em_profundidade_no_reverso(adjacente, visitados, grafo_reverso)
+
     def transformar_em_nao_direcionado(self):
         grafo_nao_direcionado = Grafo()
-        
-        for vertice in self.__lista_de_vertices:
-            grafo_nao_direcionado.adicionar_vertice(vertice.obter_nome(), vertice.obter_ponderacao())
-        
-        for aresta in self.__lista_de_arestas:
-            verticeA = aresta.obter_vertice_A().obter_nome()
-            verticeB = aresta.obter_vertice_B().obter_nome()
-            ponderacao = aresta.obter_ponderacao()
-            rotulacao = aresta.obter_rotulacao()
-            
-            grafo_nao_direcionado.adicionar_aresta(verticeA, verticeB, ponderacao, rotulacao, direcionada=False)
+
+        lista_de_adjacentes = self.obter_adj()
+
+        for vertice in lista_de_adjacentes.keys():
+            grafo_nao_direcionado.adicionar_vertice(vertice)
+
+        for vertice, adjacentes in lista_de_adjacentes.items():
+            for adjacente in adjacentes:
+                if adjacente not in grafo_nao_direcionado.obter_adj().get(vertice, []):
+                    grafo_nao_direcionado.adicionar_aresta(vertice, adjacente, ponderacao=1, rotulacao="", direcionada=False)
+                if vertice not in grafo_nao_direcionado.obter_adj().get(adjacente, []):
+                    grafo_nao_direcionado.adicionar_aresta(adjacente, vertice, ponderacao=1, rotulacao="", direcionada=False)
 
         return grafo_nao_direcionado
     
@@ -532,27 +552,30 @@ class Grafo:
 
         visitados = set()
         grafo_nao_direcionado.busca_em_profundidade(visitados=visitados)
-        
+
         return len(visitados) == grafo_nao_direcionado.obter_numero_vertices()
 
     def verificar_simplesmente_conexo(self):
         if self.esta_vazio():
             return False
-        
+
         visitados = set()
+
         self.busca_em_profundidade(visitados, direcionado=False)
-        
+
         return len(visitados) == self.obter_numero_vertices()
 
     def identificar_conectividade(self):
-        
-        numComponentes = self.kosaraju()
+        numComponentes = self.algoritmo_de_kosaraju()
+        print("Kosaraju:", numComponentes)
+        direcao = self.__direcionado
+        print("Direcionado:", direcao)
 
-        if not self.__direcionado or numComponentes == 1:
+        if direcao and numComponentes == 1:
             print("O grafo é fortemente conexo.")
             return "fortemente conexo"
 
-        if self.verificar_semi_fortemente_conexo():
+        if direcao and self.verificar_semi_fortemente_conexo():
             print("O grafo é semi-fortemente conexo.")
             return "semi-fortemente conexo"
 
@@ -596,14 +619,15 @@ class Grafo:
                     if low[adj.obter_nome()] > descobertas[v.obter_nome()]:
                         pontes.append((v.obter_nome(), adj.obter_nome()))
 
-                elif adj != v.get_vertice_pai():
+                elif adj != v.obter_vertice_pai():
                     low[v.obter_nome()] = min(low[v.obter_nome()], descobertas[adj.obter_nome()])
 
         for v in self.__lista_de_vertices:
             if v.obter_nome() not in visitados:
                 dfs_pontes(v)
 
-        pontes.inverter()
+        pontes.reverse()
+        print("Tarjam", pontes)
         return pontes
 
     def identificar_pontes_naive(self):
@@ -621,6 +645,8 @@ class Grafo:
                 pontes.append((verticeA, verticeB))
  
             self.adicionar_aresta(verticeA, verticeB, ponderacao, rotulacao, direcionada)
+        
+        print("Naive", pontes)
         return pontes
 
     def identificar_articulacoes(self):
@@ -693,7 +719,7 @@ class Grafo:
 
         grau_impar = 0
         for v in self.__lista_de_vertices:
-            adjacentes = self.__lista_de_adjacentes.get(v.obter_nome(), [])
+            adjacentes = self.__lista_de_adjacentes.obter(v.obter_nome(), [])
         
             if len(adjacentes) % 2 != 0:
                 grau_impar += 1
@@ -706,7 +732,7 @@ class Grafo:
             return False
   
     def algoritmo_de_fleury(self):
-        if not self.isEuleriano():
+        if not self.euleriano():
             print("O grafo não é euleriano.")
             return None
     
@@ -716,14 +742,14 @@ class Grafo:
     
         vertice_inicial = None
         for v in grafo_copia.obter_vertices():
-            if len(grafo_copia.getArestasAdjacentes(v)) % 2 != 0:
+            if len(grafo_copia.obter_arestas_ajacentes_ao_vertice(v)) % 2 != 0:
                 vertice_inicial = v
                 break
         if vertice_inicial is None:
             vertice_inicial = grafo_copia.obter_vertices()[0]
     
         def fleury(v):
-            for adjNome in grafo_copia.getArestasAdjacentes(v):
+            for adjNome in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
                 adj = grafo_copia.obter_vertice(adjNome)
             
                 if self.is_conexo_removendo(v, adj):
@@ -741,10 +767,24 @@ class Grafo:
     
         return caminho
 
+    def is_conexo_removendo(self, v1, v2):
+        # Faz uma cópia do grafo
+        grafo_copia = self.copia()
+    
+        # Remove a aresta entre v1 e v2
+        grafo_copia.remover_aresta(v1, v2)
+
+        # Verifica se o grafo permanece conexo após a remoção
+        visitados = set()
+        grafo_copia.busca_em_profundidade(v1, visitados)  # Faz uma busca a partir de v1
+    
+        # Se todos os vértices foram visitados, o grafo é conexo
+        return len(visitados) == grafo_copia.obter_numero_vertices()
+
     def exportar_para_gexf(self, nome_arquivo: str):
 
         gexf = ET.Element("gexf", xmlns="http://www.gexf.net/1.2draft", version="1.2")
-        graph = ET.SubElement(gexf, "graph", defaultedgetype="directed" if self.__direcionado else "undirected", mode="static")
+        graph = ET.SubElement(gexf, "graph", defaultedobterype="directed" if self.__direcionado else "undirected", mode="static")
 
         nodes = ET.SubElement(graph, "nodes")
         for vertice in self.__lista_de_vertices:
@@ -755,7 +795,7 @@ class Grafo:
             edge_attribs = {
                 "id": str(index),
                 "source": aresta.obter_vertice_A().obter_nome(),
-                "target": aresta.obter_vertice_B().obter_nome(),
+                "tarobter": aresta.obter_vertice_B().obter_nome(),
             }
             if aresta.e_direcionada():
                 edge_attribs["type"] = "directed"
@@ -770,29 +810,29 @@ class Grafo:
             grafo = Grafo()
 
             tree = ET.parse(nome_arquivo)
-            root = tree.getroot()
+            root = tree.obterroot()
 
             namespace = {"gexf": "http://www.gexf.net/1.2draft"}
 
             graph = root.find("gexf:graph", namespace)
-            direcionado = graph.get("defaultedgetype", "undirected") == "directed"
+            direcionado = graph.obter("defaultedobterype", "undirected") == "directed"
             grafo.__direcionado = direcionado
 
             nodes = graph.find("gexf:nodes", namespace)
             for node in nodes.findall("gexf:node", namespace):
-                id_vertice = node.get("id")
-                rotulacao = node.get("label", id_vertice)
+                id_vertice = node.obter("id")
+                rotulacao = node.obter("label", id_vertice)
                 grafo.adicionar_vertice(rotulacao)
 
             edges = graph.find("gexf:edges", namespace)
             for edge in edges.findall("gexf:edge", namespace):
-                source_id = edge.get("source")
-                target_id = edge.get("target")
-                ponderacao = float(edge.get("weight", 1))
-                rotulacao = edge.get("label", "")
-                direcionada = direcionado or edge.get("type", "undirected") == "directed"
+                source_id = edge.obter("source")
+                tarobter_id = edge.obter("tarobter")
+                ponderacao = float(edge.obter("weight", 1))
+                rotulacao = edge.obter("label", "")
+                direcionada = direcionado or edge.obter("type", "undirected") == "directed"
 
-                grafo.adicionar_aresta(source_id, target_id, ponderacao, rotulacao, direcionada)
+                grafo.adicionar_aresta(source_id, tarobter_id, ponderacao, rotulacao, direcionada)
 
             print(f"Grafo importado com sucesso de {nome_arquivo}")
             return grafo

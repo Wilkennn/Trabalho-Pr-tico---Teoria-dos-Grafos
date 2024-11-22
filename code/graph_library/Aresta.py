@@ -14,7 +14,7 @@ class Aresta:
     def obter_vertice_B(self):
         return self.__verticeB
     
-    def obeter_rotulacao(self):
+    def obter_rotulacao(self):
         return self.__rotulacao
     
     def obter_ponderacao(self):

@@ -11,7 +11,7 @@ class Vertice:
         self.__tempo_descoberta = None;
         self.__vertice_pai = None;
     
-    def definir_tempo_termino(self, tempo_termino: int) -> None:
+    def set_tempo_termino(self, tempo_termino: int) -> None:
         self.__tempo_termino = tempo_termino
 
     def obter_tempo_termino(self) -> int:
@@ -20,7 +20,7 @@ class Vertice:
     def set_tempo_descoberta(self, tempo_descoberta: int) -> None:
         self.__tempo_descoberta = tempo_descoberta
     
-    def obter__tempo_descoberta(self) -> int:
+    def obter_tempo_descoberta(self) -> int:
         return self.__tempo_descoberta
     
     def set_vertice_pai(self, vertice_pai: 'Vertice') -> None:
