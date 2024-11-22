@@ -28,7 +28,7 @@ class Grafo:
                 aresta.obter_vertice_B().obter_nome(),
                 aresta.obter_ponderacao(),
                 aresta.obter_rotulacao(),
-                aresta.e_direcioanada()
+                aresta.e_direcionada()
             )
         
         return copia
@@ -40,14 +40,14 @@ class Grafo:
             reverso.adicionar_vertice(vertice.obter_nome(), vertice.obter_ponderacao())
         
         for aresta in self.obter_todas_arestas():
-            if aresta.e_direcioanada():
+            if aresta.e_direcionada():
 
                 reverso.adicionar_aresta(
                     aresta.obter_vertice_B().obter_nome(),
                     aresta.obter_vertice_A().obter_nome(),
                     aresta.obter_ponderacao(),
                     aresta.obter_rotulacao(),
-                    aresta.e_direcioanada()
+                    aresta.e_direcionada()
                 )
             else:
                 reverso.adicionar_aresta(
@@ -55,7 +55,7 @@ class Grafo:
                     aresta.obter_vertice_B().obter_nome(),
                     aresta.obter_ponderacao(),
                     aresta.obter_rotulacao(),
-                    aresta.e_direcioanada()
+                    aresta.e_direcionada()
                 )
         
         return reverso
@@ -113,7 +113,7 @@ class Grafo:
     
     def sao_adj_v(self, verticeA: str, verticeB: str) -> bool:
         for aresta in self.__lista_de_arestas:
-            direcionada = aresta.e_direcioanada()
+            direcionada = aresta.e_direcionada()
 
             if direcionada:
                 if aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB:
@@ -220,7 +220,7 @@ class Grafo:
     def buscar_aresta(self, verticeA: str, verticeB: str):
         
         for aresta in self.__lista_de_arestas:
-            direcionada = aresta.e_direcioanada()
+            direcionada = aresta.e_direcionada()
 
             if direcionada:
                 if aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB:
@@ -292,13 +292,13 @@ class Grafo:
                 aresta_found = False
                 for aresta in self.__lista_de_arestas:
                     
-                    if not aresta.e_direcioanada():
+                    if not aresta.e_direcionada():
                         if (aresta.obter_vertice_A() == verticeA and aresta.obter_vertice_B() == verticeB) or \
                            (aresta.obter_vertice_A() == verticeB and aresta.obter_vertice_B() == verticeA):
                             aresta_found = True
                             break
                     
-                    elif aresta.e_direcioanada():
+                    elif aresta.e_direcionada():
                         if (aresta.obter_vertice_A() == verticeA and aresta.obter_vertice_B() == verticeB) or \
                            (aresta.obter_vertice_A() == verticeB and aresta.obter_vertice_B() == verticeA):
                             aresta_found = True
@@ -333,7 +333,7 @@ class Grafo:
         for index_aresta, aresta in enumerate(self.__lista_de_arestas):
             verticeA = aresta.obter_vertice_A().obter_nome()
             verticeB = aresta.obter_vertice_B().obter_nome()
-            direcionada = aresta.e_direcioanada()
+            direcionada = aresta.e_direcionada()
 
             matriz_incidencia[vertice_to_index[verticeA]][index_aresta] = -1 if direcionada else 1
             matriz_incidencia[vertice_to_index[verticeB]][index_aresta] = 1
@@ -356,7 +356,6 @@ class Grafo:
 
     def gerar_matriz_adjacencia(self) -> List[List[int]]:
         num_vertices = self.obter_numero_vertices()
-        num_arestas = self.obter_numero_arestas()
         
         matriz_adjacencia = [[0] * num_vertices for _ in range(num_vertices)]
         
@@ -365,7 +364,7 @@ class Grafo:
         for aresta in self.__lista_de_arestas:
             verticeA = aresta.obter_vertice_A().obter_nome()
             verticeB = aresta.obter_vertice_B().obter_nome()
-            direcionada = aresta.e_direcioanada()
+            direcionada = aresta.e_direcionada()
 
             i = vertice_to_index[verticeA]
             j = vertice_to_index[verticeB]
@@ -402,7 +401,7 @@ class Grafo:
 
             lista_adjacencia[verticeA].append(verticeB)
 
-            if not aresta.e_direcioanada():
+            if not aresta.e_direcionada():
                 lista_adjacencia[verticeB].append(verticeA)
 
         return lista_adjacencia
@@ -614,7 +613,7 @@ class Grafo:
             verticeB = aresta.obter_vertice_B().obter_nome()
             ponderacao = aresta.obter_ponderacao()
             rotulacao = aresta.obter_rotulacao()
-            direcionada = aresta.e_direcioanada()
+            direcionada = aresta.e_direcionada()
 
             self.remover_aresta(verticeA, verticeB)
 
@@ -677,8 +676,8 @@ class Grafo:
                 return False
 
             for v in self.__lista_de_vertices:
-                in_degree = len(self.__predecessores.get(v.obter_nome(), []))  
-                out_degree = len(self.__sucessores.get(v.obter_nome(), [])) 
+                in_degree = len(self.__predecessores.get(v.obter_nome(), []))
+                out_degree = len(self.__sucessores.get(v.obter_nome(), []))
         
                 if in_degree != out_degree:
                     return False
@@ -758,9 +757,46 @@ class Grafo:
                 "source": aresta.obter_vertice_A().obter_nome(),
                 "target": aresta.obter_vertice_B().obter_nome(),
             }
-            if aresta.e_direcioanada():
+            if aresta.e_direcionada():
                 edge_attribs["type"] = "directed"
             ET.SubElement(edges, "edge", **edge_attribs)
 
         tree = ET.ElementTree(gexf)
         tree.write(nome_arquivo, encoding="utf-8", xml_declaration=True)
+    
+    @staticmethod
+    def importar_de_gexf(nome_arquivo: str) -> 'Grafo':
+        try:
+            grafo = Grafo()
+
+            tree = ET.parse(nome_arquivo)
+            root = tree.getroot()
+
+            namespace = {"gexf": "http://www.gexf.net/1.2draft"}
+
+            graph = root.find("gexf:graph", namespace)
+            direcionado = graph.get("defaultedgetype", "undirected") == "directed"
+            grafo.__direcionado = direcionado
+
+            nodes = graph.find("gexf:nodes", namespace)
+            for node in nodes.findall("gexf:node", namespace):
+                id_vertice = node.get("id")
+                rotulacao = node.get("label", id_vertice)
+                grafo.adicionar_vertice(rotulacao)
+
+            edges = graph.find("gexf:edges", namespace)
+            for edge in edges.findall("gexf:edge", namespace):
+                source_id = edge.get("source")
+                target_id = edge.get("target")
+                ponderacao = float(edge.get("weight", 1))
+                rotulacao = edge.get("label", "")
+                direcionada = direcionado or edge.get("type", "undirected") == "directed"
+
+                grafo.adicionar_aresta(source_id, target_id, ponderacao, rotulacao, direcionada)
+
+            print(f"Grafo importado com sucesso de {nome_arquivo}")
+            return grafo
+
+        except Exception as e:
+            print(f"Erro ao importar o grafo: {e}")
+            return None
