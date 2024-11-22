@@ -571,6 +571,9 @@ class Grafo:
         return len(visitados) == self.getNumVertices()
 
     def identificar_conectividade(self):
+
+        print(self.getVertices());
+        return;
         
         numComponentes = self.kosaraju()
 
