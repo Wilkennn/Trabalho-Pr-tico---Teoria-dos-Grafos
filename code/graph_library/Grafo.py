@@ -19,11 +19,9 @@ class Grafo:
     def copia(self):
         copia = Grafo()
         
-        # Copia os vértices
         for vertice in self.obter_vertices():
             copia.adicionar_vertice(vertice.obter_nome(), vertice.obter_ponderacao())
         
-        # Copia as arestas
         for aresta in self.obter_arestas():
             copia.adicionar_aresta(
                 aresta.obter_vertice_A().obter_nome(),
