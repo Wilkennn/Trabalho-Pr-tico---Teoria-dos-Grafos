@@ -155,18 +155,14 @@ class Grafo:
 
             if direcionada:
                 if aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB:
-                    print(f"Os vértices '{verticeA}' e '{verticeB}' são adjacentes.")
-                    print(f"{direcionada}")
                     return True
             else:
                 if (
                     (aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB) or
                     (aresta.obter_vertice_A().obter_nome() == verticeB and aresta.obter_vertice_B().obter_nome() == verticeA)
                 ):
-                    print(f"Os vértices '{verticeA}' e '{verticeB}' são adjacentes.")
                     return True
 
-        print(f"'{verticeA}' e '{verticeB}' NÃO são adjacentes.")
         return False
 
     def sao_adj_a(self, aresta1: Aresta, aresta2: Aresta) -> bool:
@@ -176,10 +172,8 @@ class Grafo:
         verticeB2 = aresta2.obter_vertice_B().obter_nome()
 
         if verticeA1 == verticeA2 or verticeA1 == verticeB2 or verticeB1 == verticeA2 or verticeB1 == verticeB2:
-            print(f"As arestas com vértices ('{verticeA1}', '{verticeB1}') e ('{verticeA2}', '{verticeB2}') são adjacentes.")
             return True
         else:
-            print(f"As arestas com vértices ('{verticeA1}', '{verticeB1}') e ('{verticeA2}', '{verticeB2}') NÃO são adjacentes.")
             return False
 
     def adicionar_aresta(self, verticeA, verticeB, ponderacao, rotulacao, direcionada):
@@ -187,8 +181,7 @@ class Grafo:
         vB = next((v for v in self.__lista_de_vertices if v.obter_nome() == verticeB), None)
 
         if not vA or not vB:
-            print("Um ou ambos os vértices não existem no grafo.")
-            return False
+            return False 
 
         aresta = Aresta(vA, vB, ponderacao, rotulacao, direcionada)
 
@@ -201,10 +194,9 @@ class Grafo:
                 
                 self.__direcionado = True
 
-                print(f"Aresta direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
-            else:
-                # print("Aresta direcionada já existe. Aresta não adicionada.")
-                return False
+                return True
+
+            return False
 
         else:
             if not any(
@@ -221,12 +213,9 @@ class Grafo:
 
                 self.__direcionado = False
 
-                print(f"Aresta não direcionada entre '{verticeA}' e '{verticeB}' adicionada com sucesso.")
-            else:
-                # print("Aresta não direcionada já existe. Aresta não adicionada.")
-                return False
+                return True  
 
-        return True
+            return False
 
     def remover_aresta(self, verticeA, verticeB):
         arestas_removidas = False
@@ -253,53 +242,38 @@ class Grafo:
             if verticeB in self.__sucessores and verticeA in self.__sucessores[verticeB]:
                 self.__sucessores[verticeB].remove(verticeA)
         if verticeA in self.__predecessores and verticeB in self.__predecessores[verticeA]:
-                self.__predecessores[verticeA].remove(verticeB)
+            self.__predecessores[verticeA].remove(verticeB)
 
         arestas_removidas = True
 
-        # if arestas_removidas:
-        #     print(f"Aresta entre '{verticeA}' e '{verticeB}' removida com sucesso.")
-        # else:
-        #     print("Falha ao remover a aresta ou a aresta não existe.")
+        return arestas_removidas 
 
-        return True
-
-    def buscar_aresta(self, verticeA: str, verticeB: str):
-
+    def buscar_aresta(self, verticeA: str, verticeB: str) -> bool:
         for aresta in self.__lista_de_arestas:
             direcionada = aresta.e_direcionada()
 
             if direcionada:
                 if aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB:
-                    print(f"A aresta direcionada {verticeA} -> {verticeB} existe")
                     return True
             else:
                 if (
                     (aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB) or
                     (aresta.obter_vertice_A().obter_nome() == verticeB and aresta.obter_vertice_B().obter_nome() == verticeA)
                 ):
-                    print(f"A aresta não direcionada {verticeA} - {verticeB} existe")
                     return True
 
-        print(f"A aresta entre {verticeA} e {verticeB} não existe.")
         return False
 
     def adicionar_vertice(self, rotulacao: str, ponderacao: int = 0) -> bool:
         for vertice in self.__lista_de_vertices:
             if vertice == rotulacao:
-                print(f"O vértice '{rotulacao}' já existe no grafo.")
-                return False
+                return False  
 
         novo_vertice = Vertice(rotulacao, ponderacao)
         self.__lista_de_vertices.append(novo_vertice)
         self.__lista_de_adjacentes[rotulacao] = []
         self.__sucessores[rotulacao] = []
         self.__predecessores[rotulacao] = []
-
-        if ponderacao != 0:
-            print(f"Vértice '{rotulacao}' com ponderação {ponderacao} adicionado ao grafo.")
-        else:
-            print(f"Vértice '{rotulacao}' adicionado ao grafo.")
 
         return True
 
@@ -311,8 +285,7 @@ class Grafo:
                 break
 
         if not vertice_encontrado:
-            print(f"O vértice '{rotulacao}' não existe no grafo.")
-            return False
+            return False  
 
         self.__lista_de_vertices.remove(vertice_encontrado)
         self.__lista_de_adjacentes.pop(rotulacao, None)
@@ -321,9 +294,8 @@ class Grafo:
             if aresta.obter_vertice_A() != rotulacao and aresta.obter_vertice_B() != rotulacao
         ]
 
-        # print(f"Vértice '{rotulacao}' removido com sucesso.")
-        return True
-
+        return True  
+    
     def esta_vazio(self) -> bool:
         return self.obter_numero_vertices()== 0
 
@@ -532,6 +504,7 @@ class Grafo:
             if pai is None:
                 count+=1
 
+        
         return count
 
     def transformar_em_nao_direcionado(self):
@@ -591,18 +564,6 @@ class Grafo:
         return len(visitados) == grafo_nao_direcionado.obter_numero_vertices()
 
     def identificar_conectividade(self):
-        if self.__direcionado:
-            if self.verificar_fortemente_conexo():
-                print("O grafo é fortemente conexo.")
-            elif self.verificar_semi_fortemente_conexo():
-                print("O grafo é semi-fortemente conexo.")
-            else:
-                print("O grafo não é fortemente nem semi-fortemente conexo.")
-        else:
-            if self.verificar_simplesmente_conexo():
-                print("O grafo é simplesmente conexo.")
-            else:
-                print("O grafo não é conexo.")
 
         return self.verificar_fortemente_conexo() or self.verificar_semi_fortemente_conexo() or self.verificar_simplesmente_conexo()
 
@@ -655,7 +616,7 @@ class Grafo:
 
             self.remover_aresta(verticeA, verticeB)
 
-            if self.identificar_conectividade() == "não conexo":
+            if not self.identificar_conectividade():
                 pontes.append((verticeA, verticeB))
 
             self.adicionar_aresta(verticeA, verticeB, ponderacao, rotulacao, direcionada)
@@ -775,7 +736,7 @@ class Grafo:
         def fleury(v):
             for aresta in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
 
-                adj = aresta.obter_vertice_B() if aresta.obter_vertice_A() == v else aresta.ob
+                adj = aresta.obter_vertice_B() 
 
                 if self.is_conexo_removendo(v, adj):
                     caminho.append((v.obter_nome(), adj))
