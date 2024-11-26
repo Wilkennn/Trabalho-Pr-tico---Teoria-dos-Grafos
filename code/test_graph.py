@@ -16,8 +16,8 @@ if __name__ == "__main__":
     grafo.adicionar_vertice("7", 3)
    
     grafo.adicionar_aresta("1", "2", ponderacao=10, rotulacao="Aresta1", direcionada=False)
-    grafo.adicionar_aresta("1", "3", ponderacao=10, rotulacao="Aresta1", direcionada=False)
     grafo.adicionar_aresta("2", "3", ponderacao=10, rotulacao="Aresta1", direcionada=False)
+    grafo.adicionar_aresta("1", "3", ponderacao=10, rotulacao="Aresta1", direcionada=False)
     grafo.adicionar_aresta("2", "5", ponderacao=10, rotulacao="Aresta1", direcionada=False)
     grafo.adicionar_aresta("3", "6", ponderacao=10, rotulacao="Aresta1", direcionada=False)
     grafo.adicionar_aresta("2", "4", ponderacao=10, rotulacao="Aresta1", direcionada=False)

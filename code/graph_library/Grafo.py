@@ -226,32 +226,42 @@ class Grafo:
         verticeA_nome = verticeA.obter_nome()
         verticeB_nome = verticeB.obter_nome()
         
+        # Filtra as arestas para remover a correspondente entre verticeA e verticeB
         self.__lista_de_arestas = [
             aresta for aresta in self.__lista_de_arestas
             if not (
                 (aresta.obter_vertice_A().obter_nome() == verticeA_nome and aresta.obter_vertice_B().obter_nome() == verticeB_nome) or
-                (not self.__direcionado and aresta.obter_vertice_A().obter_nome() == verticeB and aresta.obter_vertice_B().obter_nome() == verticeA)
+                (not self.__direcionado and aresta.obter_vertice_A().obter_nome() == verticeB_nome and aresta.obter_vertice_B().obter_nome() == verticeA_nome)
             )
         ]
 
+        # Remoção das arestas nas listas de adjacências e sucessores
         if self.__direcionado:
-
-            self.__lista_de_adjacentes[verticeA_nome].remove(verticeB)
-
-            self.__sucessores[verticeA_nome].remove(verticeB)
-            self.__predecessores[verticeB_nome].remove(verticeA)
+            if verticeB_nome in self.__lista_de_adjacentes[verticeA_nome]:
+                self.__lista_de_adjacentes[verticeA_nome].remove(verticeB_nome)
+            if verticeB_nome in self.__sucessores[verticeA_nome]:
+                self.__sucessores[verticeA_nome].remove(verticeB_nome)
+            if verticeA_nome in self.__predecessores[verticeB_nome]:
+                self.__predecessores[verticeB_nome].remove(verticeA_nome)
         else:
+            # Para grafos não direcionados, remova de ambas as direções
+            if verticeB_nome in self.__lista_de_adjacentes[verticeA_nome]:
+                self.__lista_de_adjacentes[verticeA_nome].remove(verticeB_nome)
+            if verticeA_nome in self.__lista_de_adjacentes[verticeB_nome]:
+                self.__lista_de_adjacentes[verticeB_nome].remove(verticeA_nome)
 
-            self.__lista_de_adjacentes[verticeA_nome].remove(verticeB)
-            self.__lista_de_adjacentes[verticeB_nome].remove(verticeA)
+            if verticeB_nome in self.__sucessores[verticeA_nome]:
+                self.__sucessores[verticeA_nome].remove(verticeB_nome)
+            if verticeA_nome in self.__sucessores[verticeB_nome]:
+                self.__sucessores[verticeB_nome].remove(verticeA_nome)
 
-            self.__sucessores[verticeA_nome].remove(verticeB)
-            self.__sucessores[verticeB_nome].remove(verticeA)
-
-            self.__predecessores[verticeB_nome].remove(verticeA)
-            self.__predecessores[verticeA_nome].remove(verticeB)
+            if verticeA_nome in self.__predecessores[verticeB_nome]:
+                self.__predecessores[verticeB_nome].remove(verticeA_nome)
+            if verticeB_nome in self.__predecessores[verticeA_nome]:
+                self.__predecessores[verticeA_nome].remove(verticeB_nome)
 
         return True
+
     
     def buscar_aresta(self, verticeA: str, verticeB: str) -> bool:
         for aresta in self.__lista_de_arestas:
@@ -739,12 +749,13 @@ class Grafo:
                 return False
     
     def algoritmo_de_fleury(self):
-        
+        # Verifica se o grafo possui mais de dois vértices de grau ímpar
         if sum(1 for v in self.obter_vertices() if len(self.obter_arestas_ajacentes_ao_vertice(v)) % 2 != 0) >= 3:
             return None
 
         grafo_copia = self.copia()
 
+        # Encontra um vértice de grau ímpar ou o primeiro vértice disponível
         vertice_inicial = None
         for v in grafo_copia.obter_vertices():
             if len(grafo_copia.obter_arestas_ajacentes_ao_vertice(v)) % 2 != 0:
@@ -755,32 +766,48 @@ class Grafo:
             vertice_inicial = grafo_copia.obter_vertices()[0]
 
         caminho = []
+        visitados = set()  # Conjunto para controlar os vértices já visitados
 
         def fleury(v):
+            # Marca o vértice como visitado
+            visitados.add(v.obter_nome())
+
+            # Enquanto houver arestas adjacentes ao vértice
             while grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
-                print(grafo_copia.obter_arestas_ajacentes_ao_vertice(v))
-                if len(grafo_copia.obter_arestas_ajacentes_ao_vertice(v)) > 1:
+                arestas = grafo_copia.obter_arestas_ajacentes_ao_vertice(v)
+                
+                # Se houver mais de uma aresta, evite escolher pontes, se possível
+                if len(arestas) > 1:
                     pontes = grafo_copia.identificar_pontes_naive()
 
-                    for aresta in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
+                    for aresta in arestas:
                         adj = aresta.obter_vertice_B() if v == aresta.obter_vertice_A() else aresta.obter_vertice_A()
 
-                        if aresta not in pontes:
-                            if adj in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
-                                caminho.append((v.obter_nome(), adj.obter_nome()))
-                                grafo_copia.remover_aresta(v, adj)
-                                fleury(adj)
-                                return
-
-                    adj = grafo_copia.obter_arestas_ajacentes_ao_vertice(v)[0].obter_vertice_B()
+                        # Se a aresta não for uma ponte e o vértice adjacente não foi visitado
+                        if aresta not in pontes and adj.obter_nome() not in visitados:
+                            # Adiciona ao caminho
+                            caminho.append((v.obter_nome(), adj.obter_nome()))
+                            # Remove a aresta do grafo
+                            grafo_copia.remover_aresta(v, adj)
+                            # Chama recursivamente para o vértice adjacente
+                            fleury(adj)
+                            return
+                else:
+                    # Caso haja apenas uma aresta, escolhe a única aresta disponível
+                    aresta = arestas[0]  # Pegue a única aresta disponível
+                    adj = aresta.obter_vertice_B() if v == aresta.obter_vertice_A() else aresta.obter_vertice_A()
                     caminho.append((v.obter_nome(), adj.obter_nome()))
                     grafo_copia.remover_aresta(v, adj)
                     fleury(adj)
+                    return
 
+
+        # Inicia o algoritmo a partir do vértice inicial
         fleury(vertice_inicial)
 
         return caminho
 
+    
     def exportar_para_gexf(self, nome_arquivo: str):
 
         gexf = ET.Element("gexf", xmlns="http://www.gexf.net/1.2draft", version="1.2")
