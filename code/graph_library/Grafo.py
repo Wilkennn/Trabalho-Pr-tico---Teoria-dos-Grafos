@@ -16,6 +16,9 @@ class Grafo:
         self.__sucessores: Dict[str, List[str]] = {}
         self.__direcionado: bool = isDirecionado
 
+    def e_direcionado(self):
+        return self.__direcionado
+
     def obter_lista_adjacencia(self):
         return self.__lista_de_adjacentes;
 
@@ -119,7 +122,6 @@ class Grafo:
         arestas_adjacentes = []
 
         for aresta in self.__lista_de_arestas:
-            # Verifica se o vértice A ou B da aresta é igual ao vértice passado como argumento
             if aresta.obter_vertice_A() == vertice or aresta.obter_vertice_B() == vertice:
                 arestas_adjacentes.append(aresta)
 
@@ -177,11 +179,12 @@ class Grafo:
             return False
 
     def adicionar_aresta(self, verticeA, verticeB, ponderacao, rotulacao, direcionada):
+
         vA = next((v for v in self.__lista_de_vertices if v.obter_nome() == verticeA), None)
         vB = next((v for v in self.__lista_de_vertices if v.obter_nome() == verticeB), None)
 
         if not vA or not vB:
-            return False 
+            return False
 
         aresta = Aresta(vA, vB, ponderacao, rotulacao, direcionada)
 
@@ -204,50 +207,52 @@ class Grafo:
                 (a.obter_vertice_A() == vB and a.obter_vertice_B() == vA) for a in self.__lista_de_arestas
             ):
                 self.__lista_de_arestas.append(aresta)
+
                 self.__lista_de_adjacentes.setdefault(verticeA, []).append(vB)
                 self.__lista_de_adjacentes.setdefault(verticeB, []).append(vA)
+
                 self.__predecessores.setdefault(verticeB, []).append(vA)
                 self.__predecessores.setdefault(verticeA, []).append(vB)
+
                 self.__sucessores.setdefault(verticeA, []).append(vB)
                 self.__sucessores.setdefault(verticeB, []).append(vA)
 
-                self.__direcionado = False
-
-                return True  
+                return True
 
             return False
 
     def remover_aresta(self, verticeA, verticeB):
-        arestas_removidas = False
 
+        verticeA_nome = verticeA.obter_nome()
+        verticeB_nome = verticeB.obter_nome()
+        
         self.__lista_de_arestas = [
             aresta for aresta in self.__lista_de_arestas
             if not (
-                (aresta.obter_vertice_A().obter_nome() == verticeA and aresta.obter_vertice_B().obter_nome() == verticeB) or
+                (aresta.obter_vertice_A().obter_nome() == verticeA_nome and aresta.obter_vertice_B().obter_nome() == verticeB_nome) or
                 (not self.__direcionado and aresta.obter_vertice_A().obter_nome() == verticeB and aresta.obter_vertice_B().obter_nome() == verticeA)
             )
         ]
 
-        if verticeA in self.__lista_de_adjacentes and verticeB in self.__lista_de_adjacentes[verticeA]:
-            self.__lista_de_adjacentes[verticeA].remove(verticeB)
-        if verticeB in self.__lista_de_adjacentes and verticeA in self.__lista_de_adjacentes[verticeB]:
-            self.__lista_de_adjacentes[verticeB].remove(verticeA)
+        if self.__direcionado:
 
-        if verticeA in self.__sucessores and verticeB in self.__sucessores[verticeA]:
-            self.__sucessores[verticeA].remove(verticeB)
-        if verticeB in self.__predecessores and verticeA in self.__predecessores[verticeB]:
-            self.__predecessores[verticeB].remove(verticeA)
+            self.__lista_de_adjacentes[verticeA_nome].remove(verticeB)
 
-        if not self.__direcionado:
-            if verticeB in self.__sucessores and verticeA in self.__sucessores[verticeB]:
-                self.__sucessores[verticeB].remove(verticeA)
-        if verticeA in self.__predecessores and verticeB in self.__predecessores[verticeA]:
-            self.__predecessores[verticeA].remove(verticeB)
+            self.__sucessores[verticeA_nome].remove(verticeB)
+            self.__predecessores[verticeB_nome].remove(verticeA)
+        else:
 
-        arestas_removidas = True
+            self.__lista_de_adjacentes[verticeA_nome].remove(verticeB)
+            self.__lista_de_adjacentes[verticeB_nome].remove(verticeA)
 
-        return arestas_removidas 
+            self.__sucessores[verticeA_nome].remove(verticeB)
+            self.__sucessores[verticeB_nome].remove(verticeA)
 
+            self.__predecessores[verticeB_nome].remove(verticeA)
+            self.__predecessores[verticeA_nome].remove(verticeB)
+
+        return True
+    
     def buscar_aresta(self, verticeA: str, verticeB: str) -> bool:
         for aresta in self.__lista_de_arestas:
             direcionada = aresta.e_direcionada()
@@ -265,9 +270,10 @@ class Grafo:
         return False
 
     def adicionar_vertice(self, rotulacao: str, ponderacao: int = 0) -> bool:
+        
         for vertice in self.__lista_de_vertices:
             if vertice == rotulacao:
-                return False  
+                return False
 
         novo_vertice = Vertice(rotulacao, ponderacao)
         self.__lista_de_vertices.append(novo_vertice)
@@ -503,7 +509,6 @@ class Grafo:
             pai = vertice.obter_vertice_pai()
             if pai is None:
                 count+=1
-
         
         return count
 
@@ -551,7 +556,13 @@ class Grafo:
 
         visitados = self.busca_em_profundidade()
 
-        return len(visitados) == self.obter_numero_vertices()
+        count = 0
+        for vertice in visitados:
+            pai = vertice.obter_vertice_pai()
+            if pai is None:
+                count+=1
+
+        return not (count > 1)
 
     def verificar_simplesmente_conexo(self):
         if self.esta_vazio():
@@ -561,11 +572,20 @@ class Grafo:
 
         visitados = grafo_nao_direcionado.busca_em_profundidade()
 
-        return len(visitados) == grafo_nao_direcionado.obter_numero_vertices()
+        count = 0
+        for vertice in visitados:
+            pai = vertice.obter_vertice_pai()
+            if pai is None:
+                count+=1
+
+        return not (count > 1)
 
     def identificar_conectividade(self):
-
-        return self.verificar_fortemente_conexo() or self.verificar_semi_fortemente_conexo() or self.verificar_simplesmente_conexo()
+        if self.__direcionado:
+            return self.verificar_fortemente_conexo() or \
+                self.verificar_semi_fortemente_conexo() or \
+                self.verificar_simplesmente_conexo()
+        return self.verificar_simplesmente_conexo()
 
     def identificar_pontes_tarjan(self):
         visitados = set()
@@ -607,19 +627,22 @@ class Grafo:
 
     def identificar_pontes_naive(self):
         pontes = []
-        for aresta in self.__lista_de_arestas:
-            verticeA = aresta.obter_vertice_A().obter_nome()
-            verticeB = aresta.obter_vertice_B().obter_nome()
+
+        grafo_copia = self.copia()
+
+        for aresta in grafo_copia.__lista_de_arestas:
+            verticeA = aresta.obter_vertice_A()
+            verticeB = aresta.obter_vertice_B()
             ponderacao = aresta.obter_ponderacao()
             rotulacao = aresta.obter_rotulacao()
             direcionada = aresta.e_direcionada()
 
-            self.remover_aresta(verticeA, verticeB)
+            grafo_copia.remover_aresta(verticeA, verticeB)
 
-            if not self.identificar_conectividade():
+            if not grafo_copia.identificar_conectividade():
                 pontes.append((verticeA, verticeB))
-
-            self.adicionar_aresta(verticeA, verticeB, ponderacao, rotulacao, direcionada)
+            
+            grafo_copia.adicionar_aresta(verticeA.obter_nome(), verticeB.obter_nome(), ponderacao, rotulacao, direcionada)
 
         print("Naive", pontes)
         return pontes
@@ -716,11 +739,9 @@ class Grafo:
                 return False
     
     def algoritmo_de_fleury(self):
-        if not self.euleriano():
-            print("O grafo não é euleriano.")
+        
+        if sum(1 for v in self.obter_vertices() if len(self.obter_arestas_ajacentes_ao_vertice(v)) % 2 != 0) >= 3:
             return None
-
-        caminho = []
 
         grafo_copia = self.copia()
 
@@ -729,36 +750,36 @@ class Grafo:
             if len(grafo_copia.obter_arestas_ajacentes_ao_vertice(v)) % 2 != 0:
                 vertice_inicial = v
                 break
-            
+
         if vertice_inicial is None:
             vertice_inicial = grafo_copia.obter_vertices()[0]
 
+        caminho = []
+
         def fleury(v):
-            for aresta in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
+            while grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
+                print(grafo_copia.obter_arestas_ajacentes_ao_vertice(v))
+                if len(grafo_copia.obter_arestas_ajacentes_ao_vertice(v)) > 1:
+                    pontes = grafo_copia.identificar_pontes_naive()
 
-                adj = aresta.obter_vertice_B() 
+                    for aresta in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
+                        adj = aresta.obter_vertice_B() if v == aresta.obter_vertice_A() else aresta.obter_vertice_A()
 
-                if self.is_conexo_removendo(v, adj):
-                    caminho.append((v.obter_nome(), adj))
+                        if aresta not in pontes:
+                            if adj in grafo_copia.obter_arestas_ajacentes_ao_vertice(v):
+                                caminho.append((v.obter_nome(), adj.obter_nome()))
+                                grafo_copia.remover_aresta(v, adj)
+                                fleury(adj)
+                                return
+
+                    adj = grafo_copia.obter_arestas_ajacentes_ao_vertice(v)[0].obter_vertice_B()
+                    caminho.append((v.obter_nome(), adj.obter_nome()))
                     grafo_copia.remover_aresta(v, adj)
                     fleury(adj)
-                    return
-
-                caminho.append((v.obter_nome(), adj))
-                grafo_copia.remover_aresta(v, adj)
-                fleury(adj)
-                return
 
         fleury(vertice_inicial)
 
         return caminho
-
-    def is_conexo_removendo(self, v1, v2):
-        grafo_copia = self.copia()
-
-        grafo_copia.remover_aresta(v1, v2)
-
-        return grafo_copia.identificar_conectividade()
 
     def exportar_para_gexf(self, nome_arquivo: str):
 

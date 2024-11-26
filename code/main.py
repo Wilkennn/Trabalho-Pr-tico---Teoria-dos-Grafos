@@ -240,10 +240,13 @@ def numVerAr(grafo):
     return True
 
 def iscompleto(grafo):
-
-    grafo.e_completo()
+    e_completo = grafo.e_completo()
     
-    return True
+    mensagem = "Grafo é completo!" if e_completo else "Grafo não é completo!"
+    
+    print(mensagem)
+    
+    return e_completo
 
 def isempty(grafo):
 
@@ -306,10 +309,7 @@ def busca_profundidade(grafo):
         print("O vértice não existe no grafo.")
         return True
 
-    
-    visitados = set()
-  
-    grafo.busca_em_profundidade(visitados, start=vertice_raiz)
+    grafo.busca_em_profundidade(start=vertice_raiz)
 
     grafo.exibir_resultado_busca_em_profundidade()
     
@@ -335,39 +335,52 @@ def kosaraju(grafo):
 
 def verificar_conectividade(grafo):
     
-    conectividade = grafo.identificar_conectividade()
-    print(conectividade)
-    return True
+    if grafo.e_direcionado:
+        if grafo.verificar_fortemente_conexo():
+            print("O grafo é fortemente conexo.")
+        elif grafo.verificar_semi_fortemente_conexo():
+            print("O grafo é semi-fortemente conexo.")
+        else:
+            print("O grafo não é fortemente nem semi-fortemente conexo.")
+    else:
+        if grafo.verificar_simplesmente_conexo():
+            print("O grafo é simplesmente conexo.")
+        else:
+            print("O grafo não é conexo.")
 
-def gerar_aleatorio(grafo):
-    grafo = Grafo.gerar_grafo_aleatorio()
-    
     return True
 
 def main():
+    
     grafo = Grafo()
 
+    def atualizar_grafo():
+        nonlocal grafo
+        grafo = Grafo.gerar_grafo_aleatorio()
+        print("Novo grafo gerado!")
+        return True
+
     opcoes = {
-        '0': opcao_sair,
-        '1': lambda: adicionar_vertices(grafo),
-        '2': lambda: remover_vertice(grafo),
-        '3': lambda: adicionar_aresta(grafo),
-        '4': lambda: remover_arestas(grafo),
-        '5': lambda: checarAdjV(grafo),
-        '6': lambda: checarAdjA(grafo),
-        '7': lambda: searchAresta(grafo),
-        '8': lambda: numVerAr(grafo),
-        '9': lambda: isempty(grafo),
-        '10': lambda: iscompleto(grafo),
+        '0'  : opcao_sair,
+        '1'  : lambda: adicionar_vertices(grafo),
+        '2'  : lambda: remover_vertice(grafo),
+        '3'  : lambda: adicionar_aresta(grafo),
+        '4'  : lambda: remover_arestas(grafo),
+        '5'  : lambda: checarAdjV(grafo),
+        '6'  : lambda: checarAdjA(grafo),
+        '7'  : lambda: searchAresta(grafo),
+        '8'  : lambda: numVerAr(grafo),
+        '9'  : lambda: isempty(grafo),
+        '10' : lambda: iscompleto(grafo),
         '11' : lambda: imprimir(grafo),
-        '12' :lambda: matriz_incidencia(grafo),
-        '13' :lambda: matriz_adjacencia(grafo),
-        '14' :lambda: lista_adjacencia(grafo),
-        '15' :lambda: busca_profundidade(grafo),
-        '16' :lambda: identificarPontes_Articu(grafo),
-        '17' :lambda: kosaraju(grafo),
-        '18' :lambda: verificar_conectividade(grafo),
-        '19' :lambda: gerar_aleatorio(grafo)
+        '12' : lambda: matriz_incidencia(grafo),
+        '13' : lambda: matriz_adjacencia(grafo),
+        '14' : lambda: lista_adjacencia(grafo),
+        '15' : lambda: busca_profundidade(grafo),
+        '16' : lambda: identificarPontes_Articu(grafo),
+        '17' : lambda: kosaraju(grafo),
+        '18' : lambda: verificar_conectividade(grafo),
+        '19' : lambda: atualizar_grafo()
     }
 
     while True:
@@ -375,15 +388,15 @@ def main():
         print("\033[1;31m======= Programa de Grafos =======\033[0m")
         print("Escolha uma opção:")
         print("0 - Sair")
-        print("1 - Adicionar vértices")
-        print("2 - Remover vértice")
-        print("3 - Adicionar Aresta")
-        print("4 - Remover Aresta")
-        print("5 - Chegar Adjacência entre Vértices")
-        print("6 - Chegar Adjacência entre Arestas")
-        print("7 - Verificar existência de Aresta")
-        print("8 - Contagem de vértices e arestas")
-        print("9 - Verificar se o grafo está vazio")
+        print("1  - Adicionar vértices")
+        print("2  - Remover vértice")
+        print("3  - Adicionar Aresta")
+        print("4  - Remover Aresta")
+        print("5  - Chegar Adjacência entre Vértices")
+        print("6  - Chegar Adjacência entre Arestas")
+        print("7  - Verificar existência de Aresta")
+        print("8  - Contagem de vértices e arestas")
+        print("9  - Verificar se o grafo está vazio")
         print("10 - Verificar se o grafo está completo")
         print("11 - Imprimir lista de vértices")
         print("12 - Gerar Matriz Incidência")
@@ -402,7 +415,6 @@ def main():
                 break
         else:
             print("Opção inválida. Por favor, tente outra opção.")
-
 
 if __name__ == "__main__":
     main()
